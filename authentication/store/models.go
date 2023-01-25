@@ -48,7 +48,7 @@ type UserResponse struct {
 	Address     string    `json:"address" db:"address"`
 	City        string    `json:"city" db:"city"`
 	Country     string    `json:"country" db:"country"`
-	Role        []string  `json:"role" db:"role"`
+	Role        string    `json:"role" db:"role"`
 	CreatedAt   time.Time `json:"createdAt" db:"created_at"`
 	UpdatedAt   time.Time `json:"updatedAt" db:"updated_at"`
 }
@@ -59,7 +59,7 @@ type LoginPayload struct {
 }
 
 type Response struct {
-	Message string `json:"message"`
-	Token   string `json:"token"`
-	Payload *User  `json:"payload"`
+	Message string        `json:"message"`
+	Token   string        `json:"token"`
+	Payload *UserResponse `json:"payload"`
 }

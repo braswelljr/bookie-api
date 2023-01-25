@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	Data  *DataI
-	UData *User
+	Data     *DataI
+	UserData *User
 )
 
 var secrets struct {
@@ -43,7 +43,7 @@ func ValidateToken(token string) (*SignedParams, error) {
 	}
 
 	// return the claims
-	return &SignedParams{User: UData, RegisteredClaims: *claims}, nil
+	return &SignedParams{User: UserData, RegisteredClaims: *claims}, nil
 }
 
 // GetTokens - is a function that handles the retrieval of tokens.
@@ -60,6 +60,8 @@ func GetToken(user *User) (string, error) {
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, &SignedParams{
 		User: user,
 		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    ContextKey.(string),
+			Subject:   user.ID,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 		},
 	}).SignedString([]byte(privateKey))

@@ -1,4 +1,4 @@
-package web
+package middleware
 
 const (
 	RoleAdmin = "admin"

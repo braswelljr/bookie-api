@@ -10,6 +10,7 @@ type DataI struct {
 }
 
 type User struct {
+	ID          string
 	Firstname   string
 	Lastname    string
 	Othernames  string
@@ -26,4 +27,10 @@ type User struct {
 type SignedParams struct {
 	User *User
 	jwt.RegisteredClaims
+}
+
+// Store Structs
+type CtxKey interface{}
+type CtxValues struct {
+	m map[string]interface{}
 }

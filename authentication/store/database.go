@@ -14,21 +14,6 @@ import (
 	"encore.app/pkg/middleware"
 )
 
-//	{
-//	  // HTTP body
-//	  "Firstname": "Braswell",
-//	  "Lastname": "Kenneth",
-//	  "Othernames": "Azu Junior",
-//	  "Username": "braswelljr",
-//	  "DateOfBirth": "15-04-1999",
-//	  "Email": "braswellkenneth7@gmail.com",
-//	  "Password": "console.log",
-//	  "Phone": "+233500181106",
-//	  "Address": "Suame",
-//	  "City": "Kumasi",
-//	  "Country": "Ghana"
-//	}
-//
 // get the service name
 var usersDatabase = sqlx.NewDb(sqldb.Named("authentication").Stdlib(), "postgres")
 
@@ -93,10 +78,10 @@ func Create(ctx context.Context, payload *SignupPayload) (*User, error) {
 	// create query
 	query := `
     INSERT INTO users (
-      id, firstname, lastname, othernames, username, email, date_of_birth, password, phone, address, city, country, token, refresh_token, role, created_at, updated_at
+      id, firstname, lastname, othernames, username, email, date_of_birth, password, phone, address, city, country, role, created_at, updated_at
     ) 
     VALUES (
-      :id, :firstname, :lastname, :othernames, :username, :email, :date_of_birth, :password, :phone, :address, :city, :country, :token, :refresh_token, :role, :created_at, :updated_at
+      :id, :firstname, :lastname, :othernames, :username, :email, :date_of_birth, :password, :phone, :address, :city, :country, :role, :created_at, :updated_at
     )
   `
 	// ON CONFLICT (email) DO NOTHING
@@ -125,6 +110,22 @@ func Create(ctx context.Context, payload *SignupPayload) (*User, error) {
 func Get(ctx context.Context, email string) (*User, error) {
 	// query user from database
 	user, err := FindOneByField(ctx, "email", "=", email)
+	if err != nil {
+		return &User{}, err
+	}
+
+	return &user, nil
+}
+
+// GetWithID - GetWithID is a function that gets a user by field.
+//
+//	@param ctx - context.Context
+//	@param id
+//	@return user
+//	@return error
+func GetWithID(ctx context.Context, id string) (*User, error) {
+	// query user from database
+	user, err := FindOneByField(ctx, "id", "=", id)
 	if err != nil {
 		return &User{}, err
 	}
