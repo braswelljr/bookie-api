@@ -1,5 +1,13 @@
 /.encore
 
+# Build files
 .env*.local
 encore.gen.go
 encore.gen.cue
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
