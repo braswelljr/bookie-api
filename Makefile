@@ -29,3 +29,7 @@ fix: ## Fix lint violations
 .PHONY: check-makefile
 check-makefile:
 	cat -e -t -v Makefile
+
+.PHONY: lint
+lint: ## Run linters
+	$(GOLINT) run

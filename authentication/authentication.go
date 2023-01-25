@@ -212,6 +212,9 @@ func Auth(_ context.Context, token string) (auth.UID, *store.UserResponse, error
 
 	// get the user
 	user, err := store.GetWithID(context.Background(), claims.User.ID)
+	if err != nil {
+		return "", &store.UserResponse{}, errors.New("authentication failed: unable to get user")
+	}
 
 	return auth.UID(claims.User.ID), &store.UserResponse{
 		ID:          user.ID,
