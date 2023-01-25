@@ -1,0 +1,5 @@
+/.encore
+
+.env*.local
+encore.gen.go
+encore.gen.cue
