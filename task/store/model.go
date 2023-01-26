@@ -15,11 +15,19 @@ type Task struct {
 }
 
 type Pin struct {
-	Pinned bool `json:"pinned" db:"pinned"`
+	Pinned   bool `json:"pinned" db:"pinned"`
+	Position int  `json:"position" db:"position"`
 }
 
 type Attributes struct {
-	Pin   *Pin   `json:"pinned" db:"pinned"`
-	Color string `json:"color" db:"color"`
-	Icon  string `json:"icon" db:"icon"`
+	Pin      *Pin      `json:"pinned" db:"pinned"`
+	Color    string    `json:"color" db:"color"`
+	Icon     string    `json:"icon" db:"icon"`
+	Category *Category `json:"category" db:"category"`
+}
+
+type Category struct {
+	ID          string `json:"id" db:"id"`
+	Name        string `json:"name" db:"name"`
+	Description string `json:"description" db:"description"`
 }

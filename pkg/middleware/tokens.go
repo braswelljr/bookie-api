@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -27,23 +28,28 @@ func ValidateToken(token string) (*SignedParams, error) {
 	privateKey := secrets.PrivateKey
 
 	// parse the token
-	parsedToken, err := jwt.ParseWithClaims(token, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.ParseWithClaims(token, &SignedParams{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(privateKey), nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.New("authentication failed: invalid token")
 	}
 
 	// get the claims
-	claims, ok := parsedToken.Claims.(*jwt.RegisteredClaims)
+	claims, ok := parsedToken.Claims.(*SignedParams)
 
 	// check if the claims are valid
 	if !ok || !parsedToken.Valid {
-		return nil, err
+		return nil, errors.New("authentication failed: invalid token")
+	}
+
+	// Ensure token is valid not expired
+	if !claims.VerifyExpiresAt(time.Now().Local(), true) {
+		return nil, errors.New("authentication failed: token has expired")
 	}
 
 	// return the claims
-	return &SignedParams{User: UserData, RegisteredClaims: *claims}, nil
+	return claims, nil
 }
 
 // GetTokens - is a function that handles the retrieval of tokens.

@@ -10,6 +10,8 @@ import (
 
 	"encore.app/authentication/store"
 	"encore.app/pkg/middleware"
+	"encore.app/users"
+	us "encore.app/users/store"
 )
 
 // Signup is a function that handles the signup process.
@@ -21,14 +23,14 @@ import (
 //	@return error
 //
 // encore:api public method=POST path=/signup
-func Signup(ctx context.Context, payload *store.SignupPayload) (*store.Response, error) {
+func Signup(ctx context.Context, payload *us.SignupPayload) (*store.Response, error) {
 	// validate user details
 	if err := validator.New().Struct(payload); err != nil {
 		return &store.Response{}, err
 	}
 
 	// create a new user
-	user, err := store.Create(ctx, payload)
+	user, err := users.Create(ctx, payload)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +103,7 @@ func Login(ctx context.Context, payload *store.LoginPayload) (*store.Response, e
 	}
 
 	// get the user
-	user, err := store.Get(ctx, payload.Email)
+	user, err := us.Get(ctx, payload.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -191,16 +193,16 @@ func Logout(_ context.Context) (*store.Response, error) {
 
 // Auth - Auth is a function that handles the authentication process for a user.
 //
-//		@route POST /auth
-//		@param ctx - context.Context
-//	 @param token - string
-//		@return response
-//		@return error
+//	@route POST /auth
+//	@param ctx - context.Context
+//	@param token - string
+//	@return response
+//	@return error
 //
 // encore:authhandler
-func Auth(_ context.Context, token string) (auth.UID, *store.UserResponse, error) {
+func Auth(ctx context.Context, token string) (auth.UID, *store.UserResponse, error) {
 	// check for empty token
-	if token == "" || len(strings.TrimSpace(token)) < 1 {
+	if len(strings.TrimSpace(token)) < 1 {
 		return "", &store.UserResponse{}, errors.New("authentication failed: token is empty")
 	}
 
@@ -211,7 +213,7 @@ func Auth(_ context.Context, token string) (auth.UID, *store.UserResponse, error
 	}
 
 	// get the user
-	user, err := store.GetWithID(context.Background(), claims.User.ID)
+	user, err := us.GetWithID(ctx, claims.User.ID)
 	if err != nil {
 		return "", &store.UserResponse{}, errors.New("authentication failed: unable to get user")
 	}
