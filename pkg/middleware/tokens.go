@@ -94,11 +94,7 @@ func IsAdmin() bool {
 	role := Store.GetCtxValue("role")
 
 	// check if the role is admin
-	if role == "admin" {
-		return true
-	}
-
-	return false
+	return role == "admin"
 }
 
 // IsSuperAdmin - IsSuperAdmin is a function that handles the verification of superadmin privileges.
@@ -110,9 +106,5 @@ func IsSuperAdmin() bool {
 	role := Store.GetCtxValue("role")
 
 	// check if the role is superadmin
-	if role == "superadmin" {
-		return true
-	}
-
-	return false
+	return role == "superadmin"
 }
