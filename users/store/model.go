@@ -37,14 +37,14 @@ type SignupPayload struct {
 }
 
 type UpdatePayload struct {
-	Firstname   string `json:"firstname" validate:"omitempty"`   // not required
-	Lastname    string `json:"lastname" validate:"omitempty"`    // not required
-	Othernames  string `json:"othernames" validate:"omitempty"`  // not required
-	Username    string `json:"username" validate:"omitempty"`    // not required
-	DateOfBirth string `json:"dateOfBirth" validate:"omitempty"` // not required
-	Email       string `json:"email" validate:"omitempty,email"` // not required
-	Phone       string `json:"phone" validate:"omitempty"`       // not required
-	Address     string `json:"address" validate:"omitempty"`     // not required
-	City        string `json:"city" validate:"omitempty"`        // not required
-	Country     string `json:"country" validate:"omitempty"`     // not required
+	Firstname   string `json:"firstname" db:"firstname" validate:"omitempty"`       // not required
+	Lastname    string `json:"lastname" db:"lastname" validate:"omitempty"`         // not required
+	Othernames  string `json:"othernames" db:"othernames" validate:"omitempty"`     // not required
+	Username    string `json:"username" db:"username" validate:"omitempty"`         // not required
+	DateOfBirth string `json:"dateOfBirth" db:"date_of_birth" validate:"omitempty"` // not required
+	Email       string `json:"email" db:"email" validate:"omitempty,email"`         // not required
+	Phone       string `json:"phone" db:"phone" validate:"omitempty"`               // not required
+	Address     string `json:"address" db:"address" validate:"omitempty"`           // not required
+	City        string `json:"city" db:"city" validate:"omitempty"`                 // not required
+	Country     string `json:"country" db:"country" validate:"omitempty"`           // not required
 }

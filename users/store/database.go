@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strings"
 	"time"
 
@@ -138,4 +139,65 @@ func GetWithID(ctx context.Context, id string) (*User, error) {
 	}
 
 	return &user, nil
+}
+
+// Update - Update is a function that updates a user.
+//
+//	@param ctx - context.Context
+//	@param id
+//	@param payload
+//	@return user
+//	@return error
+func Update(ctx context.Context, id string, payload UpdatePayload) (*User, error) {
+	// query user from database
+	user, err := GetWithID(ctx, id)
+	if err != nil {
+		return &User{}, err
+	}
+
+	// map for query fields
+	fields := map[string]interface{}{}
+
+	// if not empty, update user field
+	vp := reflect.ValueOf(payload)
+
+	// loop through payload fields and check for empty values
+	for i := 0; i < vp.NumField(); i++ {
+		// get the db tag name of the field
+		field := vp.Type().Field(i).Tag.Get("db")
+		// get the value of the field
+		value := vp.Field(i).Interface()
+
+		// if the value is not empty, add it to the fields map
+		if len(strings.TrimSpace(value.(string))) > 0 {
+			fields[field] = value
+		}
+	}
+
+	// create query fields
+	var ks []string
+
+	fields["updated_at"] = time.Now().UTC()
+	fields["id"] = user.ID
+
+	// loop through fields and create query fields
+	for k := range fields {
+		ks = append(ks, fmt.Sprintf("%v = :%v", k, k))
+	}
+
+	// create query with query fields and join them with commas
+	query := fmt.Sprintf("UPDATE users SET %v WHERE id = :id", strings.Join(ks, ", "))
+
+	// update user in database
+	if err := database.NamedExecQuery(ctx, usersDatabase, query, fields); err != nil {
+		return &User{}, err
+	}
+
+	// query user from database
+	usr, err := GetWithID(ctx, id)
+	if err != nil {
+		return &User{}, err
+	}
+
+	return usr, nil
 }

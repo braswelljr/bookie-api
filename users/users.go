@@ -3,6 +3,8 @@ package users
 import (
 	"context"
 
+	"github.com/go-playground/validator/v10"
+
 	"encore.app/users/store"
 )
 
@@ -33,8 +35,17 @@ func Create(ctx context.Context, payload *store.SignupPayload) (*store.User, err
 //	@return error
 //
 // encore:api auth method=PATCH path=/users/update/:id
-func Update(ctx context.Context, id string) (*store.User, error) {
-	return &store.User{
-		ID: id,
-	}, nil
+func Update(ctx context.Context, id string, payload store.UpdatePayload) (*store.User, error) {
+	// validate user details
+	if err := validator.New().Struct(payload); err != nil {
+		return &store.User{}, err
+	}
+
+	// update user
+	user, err := store.Update(ctx, id, payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
