@@ -48,6 +48,12 @@ func ValidateToken(token string) (*SignedParams, error) {
 		return nil, errors.New("authentication failed: token has expired")
 	}
 
+	// set the role in the context
+	role := Store.SetCtxValue("role", claims.User.Role)
+	if role != claims.User.Role {
+		return nil, errors.New("authentication failed: unable to set role in context")
+	}
+
 	// return the claims
 	return claims, nil
 }
@@ -77,4 +83,36 @@ func GetToken(user *User) (string, error) {
 
 	// return the token and refresh token
 	return token, nil
+}
+
+// IsAdmin - IsAdmin is a function that handles the verification of admin privileges.
+//
+//	@param ctx - context.Context
+//	@return bool
+func IsAdmin() bool {
+	// get the role from the context
+	role := Store.GetCtxValue("role")
+
+	// check if the role is admin
+	if role == "admin" {
+		return true
+	}
+
+	return false
+}
+
+// IsSuperAdmin - IsSuperAdmin is a function that handles the verification of superadmin privileges.
+//
+//	@param ctx - context.Context
+//	@return bool
+func IsSuperAdmin() bool {
+	// get the role from the context
+	role := Store.GetCtxValue("role")
+
+	// check if the role is superadmin
+	if role == "superadmin" {
+		return true
+	}
+
+	return false
 }

@@ -13,6 +13,7 @@ import (
 
 	"encore.app/pkg/database"
 	"encore.app/pkg/middleware"
+	"encore.app/pkg/pagination"
 )
 
 // get the service name
@@ -200,4 +201,108 @@ func Update(ctx context.Context, id string, payload UpdatePayload) (*User, error
 	}
 
 	return usr, nil
+}
+
+// UpdateRole - UpdateRole is a function that updates a user's role.
+//
+//	@param ctx - context.Context
+//	@param id
+//	@param role
+//	@return user
+//	@return error
+func UpdateRole(ctx context.Context, payload *UpdateRolePayload, role string) error {
+	// query user from database
+	user, err := GetWithID(ctx, payload.ID)
+	if err != nil {
+		return err
+	}
+
+	// update user in database
+	if err := database.NamedExecQuery(ctx, usersDatabase, "UPDATE users SET role = :role, updated_at = :updated_at WHERE id = :id", map[string]interface{}{
+		"role":       role,
+		"updated_at": time.Now().UTC(),
+		"id":         user.ID,
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// GetAll - GetAll is a function that gets all users.
+//
+//	@param ctx - context.Context
+//	@return users
+//	@return error
+func GetAll(ctx context.Context, pag *pagination.Options) (*PaginatedUsersResponse, error) {
+	var users []User = []User{}
+
+	// create query
+	countQuery := `SELECT COUNT(*) FROM users`
+
+	// get total count of users
+	// get count of categories
+	count, err := database.NamedCountQuery(ctx, usersDatabase, countQuery, map[string]interface{}{})
+	if err != nil {
+		return nil, fmt.Errorf("getting count of users: %w", err)
+	}
+
+	// set limit to 20 if it is less than 0 or greater than count
+	if pag.Limit < 1 || pag.Limit > count {
+		pag.Limit = 20
+	}
+
+	// calculate for pagination
+	// var paginate pagination.Paginate
+	// initialize pagination
+	paging := pagination.New(pag.Page, pag.Limit, count)
+
+	// if page is greater than total pages, set page to total pages
+	if pag.Page > paging.Pages() {
+		paging.SetPage(paging.Pages())
+	}
+
+	// query to set offset and limit
+	const query = `SELECT * FROM users LIMIT :limit OFFSET :offset`
+	// data to be passed to the query
+	p := struct {
+		Limit  int `db:"limit" json:"limit" validate:"omitempty"`
+		Offset int `db:"offset" json:"offset" validate:"omitempty"`
+	}{
+		Limit:  paging.PerPage(),
+		Offset: paging.Offset(),
+	}
+
+	// execute query
+	if err := database.NamedSliceQuery(ctx, usersDatabase, query, p, &users); err != nil {
+		return nil, fmt.Errorf("getting categories: %w", err)
+	}
+
+	usersResponse := []UserResponse{}
+
+	for _, user := range users {
+		usersResponse = append(usersResponse, UserResponse{
+			ID:          user.ID,
+			Firstname:   user.Firstname,
+			Lastname:    user.Lastname,
+			Othernames:  user.Othernames,
+			Username:    user.Username,
+			Email:       user.Email,
+			DateOfBirth: user.DateOfBirth,
+			Phone:       user.Phone,
+			Address:     user.Address,
+			City:        user.City,
+			Country:     user.Country,
+			Role:        user.Role,
+			CreatedAt:   user.CreatedAt,
+			UpdatedAt:   user.UpdatedAt,
+		})
+	}
+
+	return &PaginatedUsersResponse{
+		TotalPages:  paging.Pages(),
+		Total:       paging.Total(),
+		CurrentPage: paging.Page(),
+		Users:       usersResponse,
+	}, nil
 }

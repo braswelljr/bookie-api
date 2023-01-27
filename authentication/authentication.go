@@ -218,7 +218,12 @@ func Auth(ctx context.Context, token string) (auth.UID, *store.UserResponse, err
 		return "", &store.UserResponse{}, errors.New("authentication failed: unable to get user")
 	}
 
-	return auth.UID(claims.User.ID), &store.UserResponse{
+	// set the user id and token, role in the context
+	_ = middleware.Store.SetCtxValue("uid", user.ID)
+	_ = middleware.Store.SetCtxValue("token", token)
+	_ = middleware.Store.SetCtxValue("role", user.Role)
+
+	return auth.UID(claims.User.Role), &store.UserResponse{
 		ID:          user.ID,
 		Firstname:   user.Firstname,
 		Lastname:    user.Lastname,

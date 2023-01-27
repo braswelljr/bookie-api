@@ -232,7 +232,7 @@ func NamedStructQuery(ctx context.Context, db *sqlx.DB, query string, data inter
 	return nil
 }
 
-// NamedQueryCount is a helper function for executing queries that return a count.
+// NamedCountQuery is a helper function for executing queries that return a count.
 //
 //	@param ctx - context
 //	@param db - database connection
@@ -240,7 +240,7 @@ func NamedStructQuery(ctx context.Context, db *sqlx.DB, query string, data inter
 //	@param data - data to bind to the query
 //	@return int - integer value returned from the query
 //	@return error - error if any
-func NamedQueryCount(ctx context.Context, db *sqlx.DB, query string, data interface{}) (int, error) {
+func NamedCountQuery(ctx context.Context, db *sqlx.DB, query string, data interface{}) (int, error) {
 	q := queryString(query, data)
 	rlog.Info("database.NamedQueryCount", "query", q)
 

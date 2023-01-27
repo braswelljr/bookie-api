@@ -2,9 +2,13 @@ package users
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/go-playground/validator/v10"
 
+	"encore.app/pkg/middleware"
+	"encore.app/pkg/pagination"
 	"encore.app/users/store"
 )
 
@@ -48,4 +52,70 @@ func Update(ctx context.Context, id string, payload store.UpdatePayload) (*store
 	}
 
 	return user, nil
+}
+
+// Get - Get a user
+//
+//	@param ctx - context.Context
+//	@param id
+//	@return user
+//	@return error
+//
+// encore:api public method=GET path=/users/:id tag:cache
+func Get(ctx context.Context, id string) (*store.User, error) {
+	// get user
+	user, err := store.GetWithID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// return user
+	return user, nil
+}
+
+// UpdateRole - Updates a user's role
+//
+//	@param ctx - context.Context
+//	@param id
+//	@param role
+//	@return user
+//	@return error
+//
+// encore:api auth method=PATCH path=/users/update-role-to-admin
+func UpdateRoleAsAdmin(ctx context.Context, payload *store.UpdateRolePayload) error {
+	// check if user is admin or superadmin
+	if !middleware.IsAdmin() && !middleware.IsSuperAdmin() {
+		return errors.New("unauthorized: you are not authorized to perform this action")
+	}
+
+	// validate user details
+	if err := validator.New().Struct(payload); err != nil {
+		return err
+	}
+
+	// update user
+	if err := store.UpdateRole(ctx, payload, "admin"); err != nil {
+		return err
+	}
+
+	// return user
+	return nil
+}
+
+// GetAll - Get all users
+//
+//	@param ctx - context.Context
+//	@return users
+//	@return error
+//
+// encore:api public method=GET path=/users
+func QueryAll(ctx context.Context, options *pagination.Options) (*store.PaginatedUsersResponse, error) {
+	// query users
+	users, err := store.GetAll(ctx, options)
+	if err != nil {
+		return &store.PaginatedUsersResponse{}, fmt.Errorf("querying users: %w", err)
+	}
+
+	// return users, nil
+	return users, nil
 }
