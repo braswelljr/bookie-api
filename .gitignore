@@ -11,3 +11,8 @@ encore.gen.cue
 *.dll
 *.so
 *.dylib
+
+# Editor directories and files
+.idea/
+*.swp
+*.swo
