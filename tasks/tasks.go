@@ -66,3 +66,27 @@ func Delete(ctx context.Context, id string) error {
 	// return nil if no error
 	return nil
 }
+
+// Update - Update a task
+//
+// @param ctx - context.Context
+// @param id - string
+// @param payload
+// @return task
+// @return error
+//
+// encore:api auth method=PATCH path=/tasks/:id
+func Update(ctx context.Context, id string, payload *store.UpdateTaskPayload) error {
+	// validate payload
+	if err := validator.New().Struct(payload); err != nil {
+		return err
+	}
+
+	// update task
+	if err := store.Update(ctx, id, payload); err != nil {
+		return err
+	}
+
+	// return nil if no error
+	return nil
+}

@@ -3,6 +3,8 @@ package store
 import (
 	"context"
 	"fmt"
+	"reflect"
+	"strings"
 	"time"
 
 	"encore.dev/storage/sqldb"
@@ -152,5 +154,61 @@ func Delete(ctx context.Context, id string) error {
 	}
 
 	// Delete was successful
+	return nil
+}
+
+// Update - Update is a function that updates a task.
+//
+// @param ctx - context.Context
+// @param id - string
+// @param payload
+// @return task
+// @return error
+func Update(ctx context.Context, id string, payload *UpdateTaskPayload) error {
+	// check if task exists
+	task, err := FindOneByField(ctx, "id", "=", id)
+	if err != nil {
+		return fmt.Errorf("selecting task: %w", err)
+	}
+
+	// map for query fields
+	fields := map[string]interface{}{}
+
+	// if not empty, update user field
+	vp := reflect.ValueOf(payload)
+
+	// loop through payload fields and check for empty values
+	for i := 0; i < vp.NumField(); i++ {
+		// get the db tag name of the field
+		field := vp.Type().Field(i).Tag.Get("db")
+		// get the value of the field
+		value := vp.Field(i).Interface()
+
+		// if the value is not empty, add it to the fields map
+		if len(strings.TrimSpace(value.(string))) > 0 {
+			fields[field] = value
+		}
+	}
+
+	// create query fields
+	var ks []string
+
+	fields["updated_at"] = time.Now().UTC()
+	fields["id"] = task.ID
+
+	// loop through fields and create query fields
+	for k := range fields {
+		ks = append(ks, fmt.Sprintf("%v = :%v", k, k))
+	}
+
+	// query statement to be executed
+	q := fmt.Sprintf("UPDATE tasks SET %v WHERE id = :id RETURNING *", strings.Join(ks, ", "))
+
+	// execute query
+	if err := database.NamedExecQuery(ctx, tasksDatabase, q, fields); err != nil {
+		return fmt.Errorf("updating task: %w", err)
+	}
+
+	// return task
 	return nil
 }

@@ -44,3 +44,10 @@ type CreateTaskPayload struct {
 	Status      string `json:"status" db:"status" validate:"oneof=pending completed archived" default:"pending"`                            // pending, completed, archived
 	Category    string `json:"category" db:"category" validate:"omitonempty,oneof=general work personal shopping others" default:"general"` // default: "general", "work", "personal", "shopping", "others"
 }
+
+type UpdateTaskPayload struct {
+	Title       string `json:"title" db:"title"`
+	Description string `json:"description" db:"description" validate:"omitonempty"`                                                         // optional
+	Status      string `json:"status" db:"status" validate:"oneof=pending completed archived" default:"pending"`                            // pending, completed, archived
+	Category    string `json:"category" db:"category" validate:"omitonempty,oneof=general work personal shopping others" default:"general"` // default: "general", "work", "personal", "shopping", "others"
+}
