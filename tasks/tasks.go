@@ -2,9 +2,11 @@ package tasks
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-playground/validator/v10"
 
+	"encore.app/pkg/pagination"
 	"encore.app/tasks/store"
 )
 
@@ -56,7 +58,7 @@ func Get(ctx context.Context, id string) (*store.Task, error) {
 // @return task
 // @return error
 //
-// encore:api auth method=DELETE path=/tasks/:id
+// encore:api auth method=DELETE path=/tasks/delete/:id
 func Delete(ctx context.Context, id string) error {
 	// delete task
 	if err := store.Delete(ctx, id); err != nil {
@@ -75,7 +77,7 @@ func Delete(ctx context.Context, id string) error {
 // @return task
 // @return error
 //
-// encore:api auth method=PATCH path=/tasks/:id
+// encore:api auth method=PATCH path=/tasks/update/:id
 func Update(ctx context.Context, id string, payload *store.UpdateTaskPayload) error {
 	// validate payload
 	if err := validator.New().Struct(payload); err != nil {
@@ -84,6 +86,43 @@ func Update(ctx context.Context, id string, payload *store.UpdateTaskPayload) er
 
 	// update task
 	if err := store.Update(ctx, id, payload); err != nil {
+		return err
+	}
+
+	// return nil if no error
+	return nil
+}
+
+// GetUserTasks - Get all tasks for a user
+//
+// @param ctx - context.Context
+// @param uid - string
+// @return tasks
+// @return error
+//
+// encore:api auth method=GET path=/users/:uid/tasks
+func GetUserTasks(ctx context.Context, uid string, options *pagination.Options) (*store.PaginatedTasksResponse, error) {
+	// get user tasks
+	tasks, err := store.GetUserTasks(ctx, uid, options)
+	if err != nil {
+		return nil, fmt.Errorf("querying tasks: %w", err)
+	}
+
+	// return tasks and nil if no error
+	return tasks, nil
+}
+
+// ToggleComplete - Toggle a task's complete status
+//
+// @param ctx - context.Context
+// @param id - string
+// @return task
+// @return error
+//
+// encore:api auth method=PATCH path=/tasks/toggle-complete/:id
+func ToggleComplete(ctx context.Context, id string) error {
+	// toggle complete
+	if err := store.ToggleComplete(ctx, id); err != nil {
 		return err
 	}
 

@@ -12,6 +12,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"encore.app/pkg/database"
+	"encore.app/pkg/pagination"
 )
 
 // get the service name
@@ -104,7 +105,7 @@ func Create(ctx context.Context, id string, payload *CreateTaskPayload) (*Task, 
 	task.UpdatedAt = time.Now()
 
 	// query statement to be executed
-	q := `INSERT INTO tasks (id, user_id, title, description, status, pinned, archived, color, created_at, updated_at) VALUES (:id, :user_id, :title, :description, :status, :pinned, :archived, :color, :created_at, :updated_at) RETURNING *`
+	q := `INSERT INTO tasks (id, uid, title, description, status, pinned, archived, color, created_at, updated_at) VALUES (:id, :uid, :title, :description, :status, :pinned, :archived, :color, :created_at, :updated_at) RETURNING *`
 
 	// execute query
 	if err := database.NamedExecQuery(ctx, tasksDatabase, q, task); err != nil {
@@ -174,7 +175,7 @@ func Update(ctx context.Context, id string, payload *UpdateTaskPayload) error {
 	// map for query fields
 	fields := map[string]interface{}{}
 
-	// if not empty, update user field
+	// if not empty, update task field
 	vp := reflect.ValueOf(payload)
 
 	// loop through payload fields and check for empty values
@@ -206,6 +207,103 @@ func Update(ctx context.Context, id string, payload *UpdateTaskPayload) error {
 
 	// execute query
 	if err := database.NamedExecQuery(ctx, tasksDatabase, q, fields); err != nil {
+		return fmt.Errorf("updating task: %w", err)
+	}
+
+	// return task
+	return nil
+}
+
+// GetUserTasks - GetUserTasks is a function that gets a user's tasks.
+//
+// @param ctx - context.Context
+// @param uid - string
+// @return tasks
+// @return error
+func GetUserTasks(ctx context.Context, uid string, options *pagination.Options) (*PaginatedTasksResponse, error) {
+	// declare tasks
+	var tasks []Task = []Task{}
+
+	// query statement to be executed
+	countQuery := "SELECT COUNT(*) FROM tasks WHERE uid = :uid"
+
+	// execute query
+	count, err := database.NamedCountQuery(ctx, tasksDatabase, countQuery, map[string]interface{}{
+		"uid": uid,
+	})
+
+	// check for errors
+	if err != nil {
+		return nil, fmt.Errorf("counting tasks: %w", err)
+	}
+
+	// set limit to 20 if it is less than 0 or greater than count
+	if options.Limit < 1 || options.Limit > count {
+		options.Limit = 20
+	}
+
+	// calculate for pagination
+	// var paginate pagination.Paginate
+	// initialize pagination
+	paging := pagination.New(options.Page, options.Limit, count)
+
+	// if page is greater than total pages, set page to total pages
+	if options.Page > paging.Pages() {
+		paging.SetPage(paging.Pages())
+	}
+
+	// query statement to be executed
+	query := "SELECT * FROM tasks WHERE uid = :uid ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+
+	p := struct {
+		UID    string `db:"uid" json:"uid" validate:"required" url:"uid"`
+		Limit  int    `db:"limit" json:"limit" validate:"omitempty" url:"limit"`
+		Offset int    `db:"offset" json:"offset" validate:"omitempty" url:"offset"`
+	}{
+		UID:    uid,
+		Limit:  paging.PerPage(),
+		Offset: paging.Offset(),
+	}
+
+	// execute query
+	if err := database.NamedSliceQuery(ctx, tasksDatabase, query, p, &tasks); err != nil {
+		return nil, fmt.Errorf("selecting tasks: %w", err)
+	}
+
+	return &PaginatedTasksResponse{
+		TotalPages:  paging.Pages(),
+		Total:       paging.Total(),
+		CurrentPage: paging.Page(),
+		Tasks:       tasks,
+	}, nil
+}
+
+// ToggleComplete - ToggleComplete is a function that toggles a task's complete status.
+//
+// @param ctx - context.Context
+// @param id - string
+// @return error
+func ToggleComplete(ctx context.Context, id string) error {
+	// check if task exists
+	task, err := FindOneByField(ctx, "id", "=", id)
+	if err != nil {
+		return fmt.Errorf("selecting task: %w", err)
+	}
+
+	// query statement to be executed
+	query := `
+    UPDATE tasks 
+    SET completed = :completed, completed_at = :completed_at, updated_at = :updated_at 
+    WHERE id = :id
+  `
+
+	// execute query
+	if err := database.NamedExecQuery(ctx, tasksDatabase, query, map[string]interface{}{
+		"id":           task.ID,
+		"completed":    !task.Completed,
+		"completed_at": time.Now().UTC(),
+		"updated_at":   time.Now().UTC(),
+	}); err != nil {
 		return fmt.Errorf("updating task: %w", err)
 	}
 

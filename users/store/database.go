@@ -72,7 +72,7 @@ func Create(ctx context.Context, payload *SignupPayload) (*User, error) {
 	user.Address = strings.TrimSpace(payload.Address)
 	user.City = strings.TrimSpace(payload.City)
 	user.Country = strings.TrimSpace(payload.Country)
-	user.Role = "admin"
+	user.Role = "superadmin"
 
 	// hash password
 	password, err := middleware.HashPassword(payload.Password)
@@ -260,8 +260,8 @@ func GetAll(ctx context.Context, pag *pagination.Options) (*PaginatedUsersRespon
 	const query = `SELECT * FROM users LIMIT :limit OFFSET :offset`
 	// data to be passed to the query
 	p := struct {
-		Limit  int `db:"limit" json:"limit" validate:"omitempty"`
-		Offset int `db:"offset" json:"offset" validate:"omitempty"`
+		Limit  int `db:"limit" json:"limit" validate:"omitempty" url:"limit"`
+		Offset int `db:"offset" json:"offset" validate:"omitempty" url:"offset"`
 	}{
 		Limit:  paging.PerPage(),
 		Offset: paging.Offset(),
@@ -313,6 +313,11 @@ func Delete(ctx context.Context, id string) error {
 	user, err := GetWithID(ctx, id)
 	if err != nil {
 		return err
+	}
+
+	// check if user is a super admin
+	if user.Role == "superadmin" {
+		return fmt.Errorf("cannot delete super admin")
 	}
 
 	// delete user from database

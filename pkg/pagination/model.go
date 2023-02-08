@@ -17,8 +17,8 @@ type Query struct {
 
 // pagination options
 type Options struct {
-	Limit int `json:"limit" db:"limit"` // the number of items
-	Page  int `json:"page" db:"page"`   // the page
+	Limit int `json:"limit" db:"limit" url:"limit"` // the number of items
+	Page  int `json:"page" db:"page" url:"limit"`   // the page
 }
 
 // PaginationResponse - pagination

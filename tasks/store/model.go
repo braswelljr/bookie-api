@@ -14,6 +14,7 @@ type Task struct {
 	PinnedPosition int       `json:"pinned_position" db:"pinned_position"` // default -1 -> not pinned
 	Archived       bool      `json:"archived" db:"archived"`
 	ArchivedAt     time.Time `json:"archived_at" db:"archived_at"`
+	Completed      bool      `json:"completed" db:"completed"` // default: false
 	CompletedAt    time.Time `json:"completed_at" db:"completed_at"`
 	Color          string    `json:"color" db:"color"` // default: "default", "red", "orange", "yellow", "green", "blue", "purple", "pink", "brown", "grey"
 	CreatedAt      time.Time `json:"created_at" db:"created_at"`
@@ -40,14 +41,21 @@ type Category struct {
 
 type CreateTaskPayload struct {
 	Title       string `json:"title" db:"title"`
-	Description string `json:"description" db:"description" validate:"omitonempty"`                                                         // optional
-	Status      string `json:"status" db:"status" validate:"oneof=pending completed archived" default:"pending"`                            // pending, completed, archived
-	Category    string `json:"category" db:"category" validate:"omitonempty,oneof=general work personal shopping others" default:"general"` // default: "general", "work", "personal", "shopping", "others"
+	Description string `json:"description" db:"description" validate:"omitempty"`             // optional
+	Status      string `json:"status" db:"status" validate:"omitempty" default:"pending"`     // pending, completed, archived
+	Category    string `json:"category" db:"category" validate:"omitempty" default:"general"` // default: "general", "work", "personal", "shopping", "others"
 }
 
 type UpdateTaskPayload struct {
-	Title       string `json:"title" db:"title"`
-	Description string `json:"description" db:"description" validate:"omitonempty"`                                                         // optional
-	Status      string `json:"status" db:"status" validate:"oneof=pending completed archived" default:"pending"`                            // pending, completed, archived
-	Category    string `json:"category" db:"category" validate:"omitonempty,oneof=general work personal shopping others" default:"general"` // default: "general", "work", "personal", "shopping", "others"
+	Title       string `json:"title" db:"title" validate:"omitempty"`                         // optional
+	Description string `json:"description" db:"description" validate:"omitempty"`             // optional
+	Status      string `json:"status" db:"status" validate:"omitempty" default:"pending"`     // pending, completed, archived
+	Category    string `json:"category" db:"category" validate:"omitempty" default:"general"` // default: "general", "work", "personal", "shopping", "others"
+}
+
+type PaginatedTasksResponse struct {
+	Tasks       []Task `json:"data"`
+	Total       int    `json:"total" db:"total"`
+	TotalPages  int    `json:"total_pages" db:"total_pages"`
+	CurrentPage int    `json:"current_page" db:"current_page"`
 }
