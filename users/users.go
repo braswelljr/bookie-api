@@ -39,19 +39,20 @@ func Create(ctx context.Context, payload *store.SignupPayload) (*store.User, err
 //	@return error
 //
 // encore:api auth method=PATCH path=/users/update/:id
-func Update(ctx context.Context, id string, payload store.UpdatePayload) (*store.User, error) {
+func Update(ctx context.Context, id string, payload store.UpdatePayload) (*store.UserUpdateResponse, error) {
 	// validate user details
 	if err := validator.New().Struct(payload); err != nil {
-		return &store.User{}, err
+		return &store.UserUpdateResponse{}, err
 	}
 
 	// update user
-	user, err := store.Update(ctx, id, payload)
-	if err != nil {
-		return nil, err
+	if err := store.Update(ctx, id, payload); err != nil {
+		return &store.UserUpdateResponse{}, err
 	}
 
-	return user, nil
+	return &store.UserUpdateResponse{
+		Message: fmt.Sprintf("user with id %s updated successfully", id),
+	}, nil
 }
 
 // Get - Get a user
@@ -118,4 +119,21 @@ func QueryAll(ctx context.Context, options *pagination.Options) (*store.Paginate
 
 	// return users, nil
 	return users, nil
+}
+
+// Delete - Delete a user
+//
+//	@param ctx - context.Context
+//	@param id
+//	@return error
+//
+// encore:api auth method=DELETE path=/users/:id
+func Delete(ctx context.Context, id string) error {
+	// delete user
+	if err := store.Delete(ctx, id); err != nil {
+		return err
+	}
+
+	// return nil on a delete event
+	return nil
 }

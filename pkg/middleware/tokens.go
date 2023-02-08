@@ -85,6 +85,18 @@ func GetToken(user *User) (string, error) {
 	return token, nil
 }
 
+// GetUserID - GetUserID is a function that handles the retrieval of user id from the context.
+//
+//	@param ctx - context.Context
+//	@return string
+func GetUserID() string {
+	// get the user id from the context
+	userID := Store.GetCtxValue("userID")
+
+	// return the user id
+	return (userID).(string)
+}
+
 // IsAdmin - IsAdmin is a function that handles the verification of admin privileges.
 //
 //	@param ctx - context.Context

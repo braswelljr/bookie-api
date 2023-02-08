@@ -76,3 +76,7 @@ type PaginatedUsersResponse struct {
 	TotalPages  int            `json:"total_pages" db:"total_pages"`
 	CurrentPage int            `json:"current_page" db:"current_page"`
 }
+
+type UserUpdateResponse struct {
+	Message string `json:"message"`
+}

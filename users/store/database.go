@@ -149,11 +149,11 @@ func GetWithID(ctx context.Context, id string) (*User, error) {
 //	@param payload
 //	@return user
 //	@return error
-func Update(ctx context.Context, id string, payload UpdatePayload) (*User, error) {
+func Update(ctx context.Context, id string, payload UpdatePayload) error {
 	// query user from database
 	user, err := GetWithID(ctx, id)
 	if err != nil {
-		return &User{}, err
+		return err
 	}
 
 	// map for query fields
@@ -191,16 +191,10 @@ func Update(ctx context.Context, id string, payload UpdatePayload) (*User, error
 
 	// update user in database
 	if err := database.NamedExecQuery(ctx, usersDatabase, query, fields); err != nil {
-		return &User{}, err
+		return err
 	}
 
-	// query user from database
-	usr, err := GetWithID(ctx, id)
-	if err != nil {
-		return &User{}, err
-	}
-
-	return usr, nil
+	return nil
 }
 
 // UpdateRole - UpdateRole is a function that updates a user's role.
@@ -278,8 +272,10 @@ func GetAll(ctx context.Context, pag *pagination.Options) (*PaginatedUsersRespon
 		return nil, fmt.Errorf("getting categories: %w", err)
 	}
 
+	// create users for response
 	usersResponse := []UserResponse{}
 
+	// loop through users and append to users response
 	for _, user := range users {
 		usersResponse = append(usersResponse, UserResponse{
 			ID:          user.ID,
@@ -305,4 +301,27 @@ func GetAll(ctx context.Context, pag *pagination.Options) (*PaginatedUsersRespon
 		CurrentPage: paging.Page(),
 		Users:       usersResponse,
 	}, nil
+}
+
+// Delete - Delete is a function that deletes a user.
+//
+//	@param ctx - context.Context
+//	@param id
+//	@return error
+func Delete(ctx context.Context, id string) error {
+	// query user from database
+	user, err := GetWithID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	// delete user from database
+	if err := database.NamedExecQuery(ctx, usersDatabase, "DELETE FROM users WHERE id = :id", map[string]interface{}{
+		"id": user.ID,
+	}); err != nil {
+		return err
+	}
+
+	// delete user from database
+	return nil
 }
