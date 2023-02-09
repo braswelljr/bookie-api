@@ -158,6 +158,52 @@ func Delete(ctx context.Context, id string) error {
 	return nil
 }
 
+// DeleteMany - DeleteMany is a function that deletes many tasks.
+//
+// @param ctx - context.Context
+// @param ids - []string
+// @return error
+func DeleteMany(ctx context.Context, ids []string) error {
+	// query statement to be executed
+	q := `
+    DELETE FROM tasks
+    WHERE id IN (:ids)
+  `
+
+	// execute query
+	if err := database.NamedExecQuery(ctx, tasksDatabase, q, map[string]interface{}{
+		"ids": ids,
+	}); err != nil {
+		return fmt.Errorf("deleting tasks: %w", err)
+	}
+
+	// Delete was successful
+	return nil
+}
+
+// DeleteAllWithUserID - DeleteAllWithUserID is a function that deletes all tasks with a user ID.
+//
+// @param ctx - context.Context
+// @param id - string
+// @return error
+func DeleteAllWithUserID(ctx context.Context, id string) error {
+	// query statement to be executed
+	q := `
+    DELETE FROM tasks
+    WHERE uid = :uid
+  `
+
+	// execute query
+	if err := database.NamedExecQuery(ctx, tasksDatabase, q, map[string]interface{}{
+		"uid": id,
+	}); err != nil {
+		return fmt.Errorf("deleting tasks: %w", err)
+	}
+
+	// Delete was successful
+	return nil
+}
+
 // Update - Update is a function that updates a task.
 //
 // @param ctx - context.Context
@@ -228,9 +274,7 @@ func GetUserTasks(ctx context.Context, uid string, options *pagination.Options) 
 	countQuery := "SELECT COUNT(*) FROM tasks WHERE uid = :uid"
 
 	// execute query
-	count, err := database.NamedCountQuery(ctx, tasksDatabase, countQuery, map[string]interface{}{
-		"uid": uid,
-	})
+	count, err := database.NamedCountQuery(ctx, tasksDatabase, countQuery, map[string]interface{}{"uid": uid})
 
 	// check for errors
 	if err != nil {
@@ -253,7 +297,12 @@ func GetUserTasks(ctx context.Context, uid string, options *pagination.Options) 
 	}
 
 	// query statement to be executed
-	query := "SELECT * FROM tasks WHERE uid = :uid ORDER BY created_at DESC LIMIT :limit OFFSET :offset"
+	query := `
+    SELECT * FROM tasks
+    WHERE uid = :uid
+    ORDER BY created_at
+    DESC LIMIT :limit OFFSET :offset
+  `
 
 	p := struct {
 		UID    string `db:"uid" json:"uid" validate:"required" url:"uid"`
@@ -310,3 +359,32 @@ func ToggleComplete(ctx context.Context, id string) error {
 	// return task
 	return nil
 }
+
+// ToggleMultipleComplete - ToggleMultipleComplete is a function that toggles multiple tasks' complete status.
+//
+// @param ctx - context.Context
+// @param ids - []string
+// @return error
+func ToggleMultipleComplete(ctx context.Context, ids []string) error {
+	// query statement to be executed
+	query := `
+    UPDATE tasks 
+    SET completed = :completed, completed_at = :completed_at, updated_at = :updated_at 
+    WHERE id = ANY(:ids)
+  `
+
+	// execute query
+	if err := database.NamedExecQuery(ctx, tasksDatabase, query, map[string]interface{}{
+		"ids":          ids,
+		"completed":    true,
+		"completed_at": time.Now().UTC(),
+		"updated_at":   time.Now().UTC(),
+	}); err != nil {
+		return fmt.Errorf("updating tasks: %w", err)
+	}
+
+	// return task
+	return nil
+}
+
+//

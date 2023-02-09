@@ -9,6 +9,7 @@ import (
 
 	"encore.app/pkg/middleware"
 	"encore.app/pkg/pagination"
+	"encore.app/tasks"
 	"encore.app/users/store"
 )
 
@@ -131,6 +132,11 @@ func QueryAll(ctx context.Context, options *pagination.Options) (*store.Paginate
 func Delete(ctx context.Context, id string) error {
 	// delete user
 	if err := store.Delete(ctx, id); err != nil {
+		return err
+	}
+
+	// delete user's tasks
+	if err := tasks.DeleteAllWithUserID(ctx, id); err != nil {
 		return err
 	}
 

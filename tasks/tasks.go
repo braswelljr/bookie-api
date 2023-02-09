@@ -69,6 +69,24 @@ func Delete(ctx context.Context, id string) error {
 	return nil
 }
 
+// DeleteAllWithUser - Delete all tasks for a user
+//
+// @param ctx - context.Context
+// @param uid - string
+// @return task
+// @return error
+//
+// encore:api auth method=DELETE path=/users/:uid/tasks/delete
+func DeleteAllWithUserID(ctx context.Context, uid string) error {
+	// delete tasks
+	if err := store.DeleteAllWithUserID(ctx, uid); err != nil {
+		return err
+	}
+
+	// return nil if no error
+	return nil
+}
+
 // Update - Update a task
 //
 // @param ctx - context.Context
@@ -123,6 +141,23 @@ func GetUserTasks(ctx context.Context, uid string, options *pagination.Options) 
 func ToggleComplete(ctx context.Context, id string) error {
 	// toggle complete
 	if err := store.ToggleComplete(ctx, id); err != nil {
+		return err
+	}
+
+	// return nil if no error
+	return nil
+}
+
+// ToggleMultipleComplete - Toggle multiple tasks' complete status
+//
+// @param ctx - context.Context
+// @param {*store.ToggleMultipleTasksCompletePayload} ids - ids of tasks to toggle
+// @return error
+//
+// encore:api auth method=PATCH path=/tasks/toggle-multiple-complete
+func ToggleMultipleComplete(ctx context.Context, ids *store.MultiIdsPayload) error {
+	// toggle complete
+	if err := store.ToggleMultipleComplete(ctx, ids.Ids); err != nil {
 		return err
 	}
 

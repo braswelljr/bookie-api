@@ -80,3 +80,7 @@ type PaginatedUsersResponse struct {
 type UserUpdateResponse struct {
 	Message string `json:"message"`
 }
+
+type DeleteUserEvent struct {
+	ID string `json:"id" db:"id"`
+}
