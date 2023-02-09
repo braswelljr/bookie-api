@@ -4,11 +4,11 @@ Bookie is a simple task manager for you. The API is a RESTFUL API built with [Go
 
 ## Features
 
-- [ ] Create tasks
-- [ ] Edit tasks
-- [ ] Delete tasks
-- [ ] Mark tasks as done
-- [ ] Mark tasks as not done
+- [x] Create tasks
+- [x] Edit tasks
+- [x] Delete tasks
+- [x] Mark tasks as done
+- [x] Mark tasks as not done
 - [ ] Filter tasks by done/not done
 - [ ] Filter tasks by name
 - [ ] Filter tasks by date
