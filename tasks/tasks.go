@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"encore.dev/pubsub"
 	"github.com/go-playground/validator/v10"
 
+	"encore.app/pkg/events"
 	"encore.app/pkg/pagination"
 	"encore.app/tasks/store"
 )
@@ -86,6 +88,20 @@ func DeleteAllWithUserID(ctx context.Context, uid string) error {
 	// return nil if no error
 	return nil
 }
+
+// SUBSCRIPTIONS - Subscriptions to delete all tasks for a user
+//
+// @param ctx - context.Context
+// @param uid - string
+var _ = pubsub.NewSubscription(
+	events.DeleteAllUserTasks,
+	"delete-all-tasks-with-user-id",
+	pubsub.SubscriptionConfig[*events.DeleteAllUserTasksEvent]{
+		Handler: func(ctx context.Context, event *events.DeleteAllUserTasksEvent) error {
+			return DeleteAllWithUserID(ctx, event.UserID)
+		},
+	},
+)
 
 // Update - Update a task
 //

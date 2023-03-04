@@ -7,9 +7,9 @@ import (
 
 	"github.com/go-playground/validator/v10"
 
+	"encore.app/pkg/events"
 	"encore.app/pkg/middleware"
 	"encore.app/pkg/pagination"
-	"encore.app/tasks"
 	"encore.app/users/store"
 )
 
@@ -135,8 +135,10 @@ func Delete(ctx context.Context, id string) error {
 		return err
 	}
 
-	// delete user's tasks
-	if err := tasks.DeleteAllWithUserID(ctx, id); err != nil {
+	// publish delete user's tasks event
+	if _, err := events.DeleteAllUserTasks.Publish(ctx, &events.DeleteAllUserTasksEvent{
+		UserID: id,
+	}); err != nil {
 		return err
 	}
 
