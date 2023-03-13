@@ -9,6 +9,10 @@ endif
 run:
 	encore run
 
+.PHONY: debug
+debug: ## Debug encore by running encore daemon
+	encore daemon -f
+
 .PHONY: download
 download:
 	go mod download

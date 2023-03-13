@@ -54,14 +54,15 @@ func Signup(ctx context.Context, payload *us.SignupPayload) (*store.Response, er
 		return &store.Response{}, errors.New("authentication failed: unable to generate token")
 	}
 
-	// set the user id and token in the context
-	uid := middleware.Store.SetCtxValue("uid", user.ID)
-	tid := middleware.Store.SetCtxValue("token", token)
-	role := middleware.Store.SetCtxValue("role", user.Role)
-
-	// check if the values were set
-	if uid == "" || tid == "" || role == "" {
-		return &store.Response{}, errors.New("authentication failed: unable to set context values")
+	// set the user id and token in the context and check if the values were set successfully
+	if err := middleware.Store.SetCtxValue("uid", user.ID); err != nil {
+		return &store.Response{}, errors.New("authentication failed: unable to set context value")
+	}
+	if err = middleware.Store.SetCtxValue("token", token); err != nil {
+		return &store.Response{}, errors.New("authentication failed: unable to set context value")
+	}
+	if err = middleware.Store.SetCtxValue("roles", []string{user.Role}); err != nil {
+		return &store.Response{}, errors.New("authentication failed: unable to set context value")
 	}
 
 	// return the response
@@ -133,14 +134,15 @@ func Login(ctx context.Context, payload *store.LoginPayload) (*store.Response, e
 		return &store.Response{}, errors.New("authentication failed: unable to generate token")
 	}
 
-	// set the user id and token in the context
-	uid := middleware.Store.SetCtxValue("uid", user.ID)
-	tid := middleware.Store.SetCtxValue("token", token)
-	role := middleware.Store.SetCtxValue("role", user.Role)
-
-	// check if the values were set
-	if uid == "" || tid == "" || role == "" {
-		return &store.Response{}, errors.New("authentication failed: unable to set context values")
+	// set the user id and token in the context and check if the values were set successfully
+	if err := middleware.Store.SetCtxValue("uid", user.ID); err != nil {
+		return &store.Response{}, errors.New("authentication failed: unable to set context value")
+	}
+	if err := middleware.Store.SetCtxValue("token", token); err != nil {
+		return &store.Response{}, errors.New("authentication failed: unable to set context value")
+	}
+	if err := middleware.Store.SetCtxValue("roles", []string{user.Role}); err != nil {
+		return &store.Response{}, errors.New("authentication failed: unable to set context value")
 	}
 
 	return &store.Response{
@@ -174,14 +176,15 @@ func Login(ctx context.Context, payload *store.LoginPayload) (*store.Response, e
 //
 // encore:api public method=POST path=/logout
 func Logout(_ context.Context) (*store.Response, error) {
-	// get the user id, token, role from the context
-	uid := middleware.Store.SetCtxValue("uid", "")
-	token := middleware.Store.SetCtxValue("token", "")
-	role := middleware.Store.SetCtxValue("role", "")
-
-	// check if the values are empty
-	if uid != "" || token != "" || role != "" {
-		return &store.Response{}, errors.New("authentication failed: unable to remove context values")
+	// set the user id and token in the context and check if the values were set successfully
+	if err := middleware.Store.SetCtxValue("uid", ""); err != nil {
+		return &store.Response{}, errors.New("authentication failed: unable to set context value")
+	}
+	if err := middleware.Store.SetCtxValue("token", ""); err != nil {
+		return &store.Response{}, errors.New("authentication failed: unable to set context value")
+	}
+	if err := middleware.Store.SetCtxValue("roles", []string{}); err != nil {
+		return &store.Response{}, errors.New("authentication failed: unable to set context value")
 	}
 
 	return &store.Response{

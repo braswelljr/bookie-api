@@ -49,9 +49,25 @@ func ValidateToken(token string) (*SignedParams, error) {
 	}
 
 	// set the role in the context
-	role := Store.SetCtxValue("role", claims.User.Role)
-	if role != claims.User.Role {
+	if err := Store.SetCtxValue("roles", []string{claims.User.Role}); err != nil {
 		return nil, errors.New("authentication failed: unable to set role in context")
+	}
+
+	// get the role from the context
+	roles := Store.GetCtxValue("roles").([]string)
+	// check if the role is valid
+	if len(roles) < 1 {
+		return nil, errors.New("authentication failed: unable to get role from context")
+	}
+
+	// loop through the roles and check if the role is valid
+	for _, role := range roles {
+		if role == claims.User.Role {
+			// set the user id in the context
+			if err := Store.SetCtxValue("userID", claims.User.ID); err != nil {
+				return nil, errors.New("authentication failed: unable to set user id in context")
+			}
+		}
 	}
 
 	// return the claims
@@ -103,10 +119,17 @@ func GetUserID() string {
 //	@return bool
 func IsAdmin() bool {
 	// get the role from the context
-	role := Store.GetCtxValue("role")
+	roles := Store.GetCtxValue("roles")
+
+	// check if the roles contains admin
+	for _, role := range roles.([]string) {
+		if role == "admin" {
+			return true
+		}
+	}
 
 	// check if the role is admin
-	return role == "admin"
+	return false
 }
 
 // IsSuperAdmin - IsSuperAdmin is a function that handles the verification of superadmin privileges.
@@ -115,8 +138,15 @@ func IsAdmin() bool {
 //	@return bool
 func IsSuperAdmin() bool {
 	// get the role from the context
-	role := Store.GetCtxValue("role")
+	roles := Store.GetCtxValue("roles")
 
-	// check if the role is superadmin
-	return role == "superadmin"
+	// check if the roles contains superadmin
+	for _, role := range roles.([]string) {
+		if role == "superadmin" {
+			return true
+		}
+	}
+
+	// check if the role is admin
+	return false
 }
