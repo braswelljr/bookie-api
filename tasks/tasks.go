@@ -71,7 +71,7 @@ func Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-// DeleteAllWithUser - Delete all tasks for a user
+// DeleteAllWithUserID - Delete all tasks for a user
 //
 // @param ctx - context.Context
 // @param uid - string

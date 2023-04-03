@@ -105,7 +105,7 @@ func Create(ctx context.Context, id string, payload *CreateTaskPayload) (*Task, 
 	task.UpdatedAt = time.Now()
 
 	// query statement to be executed
-	q := `INSERT INTO tasks (id, uid, title, description, status, pinned, archived, color, created_at, updated_at) VALUES (:id, :uid, :title, :description, :status, :pinned, :archived, :color, :created_at, :updated_at) RETURNING *`
+	q := `INSERT INTO tasks (id, uid, title, description, status, pinned, archived, color, createdAt, updatedAt) VALUES (:id, :uid, :title, :description, :status, :pinned, :archived, :color, :createdAt, :updatedAt) RETURNING *`
 
 	// execute query
 	if err := database.NamedExecQuery(ctx, tasksDatabase, q, task); err != nil {
@@ -240,7 +240,7 @@ func Update(ctx context.Context, id string, payload *UpdateTaskPayload) error {
 	// create query fields
 	var ks []string
 
-	fields["updated_at"] = time.Now().UTC()
+	fields["updatedAt"] = time.Now().UTC()
 	fields["id"] = task.ID
 
 	// loop through fields and create query fields
@@ -300,7 +300,7 @@ func GetUserTasks(ctx context.Context, uid string, options *pagination.Options) 
 	query := `
     SELECT * FROM tasks
     WHERE uid = :uid
-    ORDER BY created_at
+    ORDER BY createdAt
     DESC LIMIT :limit OFFSET :offset
   `
 
@@ -342,16 +342,16 @@ func ToggleComplete(ctx context.Context, id string) error {
 	// query statement to be executed
 	query := `
     UPDATE tasks 
-    SET completed = :completed, completed_at = :completed_at, updated_at = :updated_at 
+    SET completed = :completed, completedAt = :completedAt, updatedAt = :updatedAt 
     WHERE id = :id
   `
 
 	// execute query
 	if err := database.NamedExecQuery(ctx, tasksDatabase, query, map[string]interface{}{
-		"id":           task.ID,
-		"completed":    !task.Completed,
-		"completed_at": time.Now().UTC(),
-		"updated_at":   time.Now().UTC(),
+		"id":          task.ID,
+		"completed":   !task.Completed,
+		"completedAt": time.Now().UTC(),
+		"updatedAt":   time.Now().UTC(),
 	}); err != nil {
 		return fmt.Errorf("updating task: %w", err)
 	}
@@ -369,16 +369,16 @@ func ToggleMultipleComplete(ctx context.Context, ids []string) error {
 	// query statement to be executed
 	query := `
     UPDATE tasks 
-    SET completed = :completed, completed_at = :completed_at, updated_at = :updated_at 
+    SET completed = :completed, completedAt = :completedAt, updatedAt = :updatedAt 
     WHERE id = ANY(:ids)
   `
 
 	// execute query
 	if err := database.NamedExecQuery(ctx, tasksDatabase, query, map[string]interface{}{
-		"ids":          ids,
-		"completed":    true,
-		"completed_at": time.Now().UTC(),
-		"updated_at":   time.Now().UTC(),
+		"ids":         ids,
+		"completed":   true,
+		"completedAt": time.Now().UTC(),
+		"updatedAt":   time.Now().UTC(),
 	}); err != nil {
 		return fmt.Errorf("updating tasks: %w", err)
 	}

@@ -84,7 +84,7 @@ func Get(ctx context.Context, id string) (*store.User, error) {
 //	@return error
 //
 // encore:api auth method=PATCH path=/users/update-role-to-admin
-func UpdateRoleAsAdmin(ctx context.Context, payload *store.UpdateRolePayload) error {
+func UpdateRole(ctx context.Context, payload *store.UpdateRolePayload) error {
 	// check if user is admin or superadmin
 	if !middleware.IsAdmin() && !middleware.IsSuperAdmin() {
 		return errors.New("unauthorized: you are not authorized to perform this action")
@@ -104,7 +104,7 @@ func UpdateRoleAsAdmin(ctx context.Context, payload *store.UpdateRolePayload) er
 	return nil
 }
 
-// GetAll - Get all users
+// QueryAll - Get all users
 //
 //	@param ctx - context.Context
 //	@return users
