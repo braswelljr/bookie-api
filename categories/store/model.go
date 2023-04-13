@@ -14,7 +14,6 @@ type Category struct {
 }
 
 type CreateCategoryPayload struct {
-	UID         string `json:"uid" db:"uid" validate:"required"`
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"description" validate:"omitempty"`
 }

@@ -88,7 +88,7 @@ func FindManyByField(ctx context.Context, field, ops string, value interface{}) 
 // @param payload
 // @return task
 // @return error
-func Create(ctx context.Context, id string, payload *CreateTaskPayload) (*Task, error) {
+func Create(ctx context.Context, id string, payload *CreateTaskPayload) error {
 	// declare task
 	task := Task{}
 
@@ -109,16 +109,15 @@ func Create(ctx context.Context, id string, payload *CreateTaskPayload) (*Task, 
 
 	// execute query
 	if err := database.NamedExecQuery(ctx, tasksDatabase, q, task); err != nil {
-		return nil, fmt.Errorf("inserting task: %w", err)
+		return fmt.Errorf("inserting task: %w", err)
 	}
 
 	// check if task was created
-	tsk, err := FindOneByField(ctx, "id", "=", task.ID)
-	if err != nil {
-		return nil, fmt.Errorf("selecting task: %w", err)
+	if tsk, err := FindOneByField(ctx, "id", "=", task.ID); err != nil || reflect.DeepEqual(tsk, Task{}) {
+		return fmt.Errorf("selecting task: %w", err)
 	}
 
-	return &tsk, nil
+	return nil
 }
 
 // Get - Get is a function that gets a task.

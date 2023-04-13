@@ -10,6 +10,7 @@ import (
 	"encore.app/pkg/events"
 	"encore.app/pkg/pagination"
 	"encore.app/tasks/store"
+	"encore.app/users"
 )
 
 // Create - Create is a function that creates a new task.
@@ -20,19 +21,24 @@ import (
 // @return error
 //
 // encore:api auth method=POST path=/tasks/:uid/create
-func Create(ctx context.Context, uid string, payload *store.CreateTaskPayload) (*store.Task, error) {
+func Create(ctx context.Context, uid string, payload *store.CreateTaskPayload) error {
 	// validate payload
 	if err := validator.New().Struct(payload); err != nil {
-		return nil, err
+		return err
+	}
+
+	// check if user exists
+	user, err := users.Get(ctx, uid)
+	if err != nil || user == nil {
+		return err
 	}
 
 	// create task
-	task, err := store.Create(ctx, uid, payload)
-	if err != nil {
-		return nil, err
+	if err := store.Create(ctx, uid, payload); err != nil {
+		return err
 	}
 
-	return task, nil
+	return nil
 }
 
 // Get - Get a task
@@ -53,6 +59,30 @@ func Get(ctx context.Context, id string) (*store.Task, error) {
 	return task, nil
 }
 
+// Update - Update a task
+//
+// @param ctx - context.Context
+// @param id - string
+// @param payload
+// @return task
+// @return error
+//
+// encore:api auth method=PATCH path=/tasks/:id/update
+func Update(ctx context.Context, id string, payload *store.UpdateTaskPayload) error {
+	// validate payload
+	if err := validator.New().Struct(payload); err != nil {
+		return err
+	}
+
+	// update task
+	if err := store.Update(ctx, id, payload); err != nil {
+		return err
+	}
+
+	// return nil if no error
+	return nil
+}
+
 // Delete - Delete a task
 //
 // @param ctx - context.Context
@@ -60,7 +90,7 @@ func Get(ctx context.Context, id string) (*store.Task, error) {
 // @return task
 // @return error
 //
-// encore:api auth method=DELETE path=/tasks/delete/:id
+// encore:api auth method=DELETE path=/tasks/:id/delete
 func Delete(ctx context.Context, id string) error {
 	// delete task
 	if err := store.Delete(ctx, id); err != nil {
@@ -102,30 +132,6 @@ var _ = pubsub.NewSubscription(
 		},
 	},
 )
-
-// Update - Update a task
-//
-// @param ctx - context.Context
-// @param id - string
-// @param payload
-// @return task
-// @return error
-//
-// encore:api auth method=PATCH path=/tasks/update/:id
-func Update(ctx context.Context, id string, payload *store.UpdateTaskPayload) error {
-	// validate payload
-	if err := validator.New().Struct(payload); err != nil {
-		return err
-	}
-
-	// update task
-	if err := store.Update(ctx, id, payload); err != nil {
-		return err
-	}
-
-	// return nil if no error
-	return nil
-}
 
 // GetUserTasks - Get all tasks for a user
 //

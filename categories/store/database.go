@@ -1,28 +1,28 @@
 package store
 
-// "context"
-// "fmt"
+// import (
+// 	"context"
+// 	"fmt"
+// 	"strings"
+// 	"time"
 
-// "strings"
-// "time"
+// 	"encore.app/pkg/database"
+// 	"encore.dev/storage/sqldb"
+// 	"github.com/google/uuid"
+// 	"github.com/jmoiron/sqlx"
+// )
 
-// "encore.app/pkg/database"
-// "encore.dev/storage/sqldb"
-
-// "github.com/google/uuid"
-// "github.com/jmoiron/sqlx"
-
-// get the service name
+// // // get the service name
 // var categoriesDatabase = sqlx.NewDb(sqldb.Named("categories").Stdlib(), "postgres")
 
-// FindByOneField - get user by field
-//
-//	@param ctx - context.Context
-//	@param field - string
-//	@param ops - string
-//	@param value - interface{}
-//	@return user
-//	@return error
+// // FindByOneField - get user by field
+// //
+// //	@param ctx - context.Context
+// //	@param field - string
+// //	@param ops - string
+// //	@param value - interface{}
+// //	@return user
+// //	@return error
 // func FindOneByField(ctx context.Context, field, ops string, value interface{}) (Category, error) {
 // 	// set the data fields for the query
 // 	data := map[string]interface{}{
@@ -47,21 +47,26 @@ package store
 // 	return category, nil
 // }
 
-// Create - Create a new category
-//
-//	@param ctx - context.Context
-//	@param payload - *CreateCategoryPayload
-//	@return error
-// func Create(ctx context.Context, payload *CreateCategoryPayload) error {
+// // Create - Create a new category
+// //
+// //	@param ctx - context.Context
+// //	@param payload - *CreateCategoryPayload
+// //	@return error
+// func Create(ctx context.Context, uid string, payload *CreateCategoryPayload) error {
 // 	// check if category already exists
-// 	if _, err := FindOneByField(ctx, "name", "=", strings.ToLower(payload.Name)); err == nil {
+// 	cat, err := FindOneByField(ctx, "name", "=", strings.ToLower(payload.Name))
+// 	if err == nil {
+// 		return err
+// 	}
+// 	// check if category ID is empty (if not, category already exists)
+// 	if len(cat.ID) > 0 {
 // 		return ErrAlreadyExists
 // 	}
 
 // 	// create category
 // 	category := Category{
 // 		ID:          uuid.New().String(),
-// 		UID:         payload.UID,
+// 		UID:         uid,
 // 		Name:        strings.ToLower(payload.Name),
 // 		Description: payload.Description,
 // 		CreatedAt:   time.Now(),
