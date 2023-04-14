@@ -69,9 +69,6 @@ func Create(ctx context.Context, payload *SignupPayload) (*User, error) {
 	user.Email = strings.TrimSpace(payload.Email)
 	user.DateOfBirth = payload.DateOfBirth
 	user.Phone = strings.TrimSpace(payload.Phone)
-	user.Address = strings.TrimSpace(payload.Address)
-	user.City = strings.TrimSpace(payload.City)
-	user.Country = strings.TrimSpace(payload.Country)
 	user.Role = "superadmin"
 
 	// hash password
@@ -286,9 +283,6 @@ func GetAll(ctx context.Context, pag *pagination.Options) (*PaginatedUsersRespon
 			Email:       user.Email,
 			DateOfBirth: user.DateOfBirth,
 			Phone:       user.Phone,
-			Address:     user.Address,
-			City:        user.City,
-			Country:     user.Country,
 			Role:        user.Role,
 			CreatedAt:   user.CreatedAt,
 			UpdatedAt:   user.UpdatedAt,

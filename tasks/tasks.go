@@ -28,8 +28,7 @@ func Create(ctx context.Context, uid string, payload *store.CreateTaskPayload) e
 	}
 
 	// check if user exists
-	user, err := users.Get(ctx, uid)
-	if err != nil || user == nil {
+	if user, err := users.Get(ctx, uid); err != nil || user == nil || user.ID != uid {
 		return err
 	}
 

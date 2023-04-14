@@ -12,9 +12,8 @@ import (
 //	@return error
 func ComparePasswords(hash, password string) (bool, error) {
 	// compare the passwords
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	// check if there is an error and return it
-	if err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)); err != nil {
 		return false, err
 	}
 

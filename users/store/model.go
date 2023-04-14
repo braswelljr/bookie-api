@@ -14,9 +14,6 @@ type User struct {
 	DateOfBirth string    `json:"dateOfBirth" db:"dateOfBirth"`
 	Password    string    `json:"password" db:"password"`
 	Phone       string    `json:"phone" db:"phone"`
-	Address     string    `json:"address" db:"address"`
-	City        string    `json:"city" db:"city"`
-	Country     string    `json:"country" db:"country"`
 	Role        string    `json:"role" db:"role"`
 	CreatedAt   time.Time `json:"createdAt" db:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt" db:"updatedAt"`
@@ -31,9 +28,6 @@ type SignupPayload struct {
 	Email       string `json:"email" validate:"required,email"`      // required
 	Password    string `json:"password" validate:"required" min:"8"` // required
 	Phone       string `json:"phone" validate:"required"`            // required
-	Address     string `json:"address" validate:"omitempty"`         // optional
-	City        string `json:"city" validate:"omitempty"`            // optional
-	Country     string `json:"country" validate:"omitempty"`         // optional
 }
 
 type UpdatePayload struct {
@@ -44,9 +38,6 @@ type UpdatePayload struct {
 	DateOfBirth string `json:"dateOfBirth" db:"dateOfBirth" validate:"omitempty"` // not required
 	Email       string `json:"email" db:"email" validate:"omitempty,email"`       // not required
 	Phone       string `json:"phone" db:"phone" validate:"omitempty"`             // not required
-	Address     string `json:"address" db:"address" validate:"omitempty"`         // not required
-	City        string `json:"city" db:"city" validate:"omitempty"`               // not required
-	Country     string `json:"country" db:"country" validate:"omitempty"`         // not required
 }
 
 type UpdateRolePayload struct {
@@ -62,9 +53,6 @@ type UserResponse struct {
 	DateOfBirth string    `json:"dateOfBirth" db:"dateOfBirth"`
 	Email       string    `json:"email" db:"email"`
 	Phone       string    `json:"phone" db:"phone"`
-	Address     string    `json:"address" db:"address"`
-	City        string    `json:"city" db:"city"`
-	Country     string    `json:"country" db:"country"`
 	Role        string    `json:"role" db:"role"`
 	CreatedAt   time.Time `json:"createdAt" db:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt" db:"updatedAt"`

@@ -18,9 +18,6 @@ type User struct {
 	Email       string
 	DateOfBirth string
 	Phone       string
-	Address     string
-	City        string
-	Country     string
 	Role        string
 }
 
