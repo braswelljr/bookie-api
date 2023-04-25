@@ -137,6 +137,23 @@ func Get(ctx context.Context, id string) (*Task, error) {
 	return &task, nil
 }
 
+// GetMany - GetMany is a function that gets many tasks.
+//
+// @param ctx - context.Context
+// @param ids - []string
+// @return tasks
+// @return error
+func GetMany(ctx context.Context, ids []string) ([]Task, error) {
+  // check if task exists
+  tasks, err := FindManyByField(ctx, "id", "=", ids)
+  if err != nil {
+    return nil, fmt.Errorf("selecting task: %w", err)
+  }
+
+  // return task
+  return tasks, nil
+}
+
 // Delete - Delete is a function that deletes a task.
 //
 // @param ctx - context.Context
