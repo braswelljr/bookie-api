@@ -5,8 +5,9 @@ import (
 )
 
 type DataI struct {
-	User  *User
-	Roles []string
+	Issuer  string
+	Subject *User
+	Roles   []string
 }
 
 type User struct {
@@ -24,6 +25,7 @@ type User struct {
 type SignedParams struct {
 	User *User
 	jwt.RegisteredClaims
+	Roles []string
 }
 
 // Store Structs

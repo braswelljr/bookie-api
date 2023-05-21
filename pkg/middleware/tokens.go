@@ -48,28 +48,6 @@ func ValidateToken(token string) (*SignedParams, error) {
 		return nil, errors.New("authentication failed: token has expired")
 	}
 
-	// set the role in the context
-	if err := Store.SetCtxValue("roles", []string{claims.User.Role}); err != nil {
-		return nil, errors.New("authentication failed: unable to set role in context")
-	}
-
-	// get the role from the context
-	roles := Store.GetCtxValue("roles").([]string)
-	// check if the role is valid
-	if len(roles) < 1 {
-		return nil, errors.New("authentication failed: unable to get role from context")
-	}
-
-	// loop through the roles and check if the role is valid
-	for _, role := range roles {
-		if role == claims.User.Role {
-			// set the user id in the context
-			if err := Store.SetCtxValue("userID", claims.User.ID); err != nil {
-				return nil, errors.New("authentication failed: unable to set user id in context")
-			}
-		}
-	}
-
 	// return the claims
 	return claims, nil
 }
@@ -92,6 +70,7 @@ func GetToken(user *User) (string, error) {
 			Subject:   user.ID,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 		},
+		Roles: []string{user.Role},
 	}).SignedString([]byte(privateKey))
 	if err != nil {
 		return "", err
@@ -99,54 +78,4 @@ func GetToken(user *User) (string, error) {
 
 	// return the token and refresh token
 	return token, nil
-}
-
-// GetUserID - GetUserID is a function that handles the retrieval of user id from the context.
-//
-//	@param ctx - context.Context
-//	@return string
-func GetUserID() string {
-	// get the user id from the context
-	userID := Store.GetCtxValue("userID")
-
-	// return the user id
-	return (userID).(string)
-}
-
-// IsAdmin - IsAdmin is a function that handles the verification of admin privileges.
-//
-//	@param ctx - context.Context
-//	@return bool
-func IsAdmin() bool {
-	// get the role from the context
-	roles := Store.GetCtxValue("roles")
-
-	// check if the roles contains admin
-	for _, role := range roles.([]string) {
-		if role == "admin" {
-			return true
-		}
-	}
-
-	// check if the role is admin
-	return false
-}
-
-// IsSuperAdmin - IsSuperAdmin is a function that handles the verification of superadmin privileges.
-//
-//	@param ctx - context.Context
-//	@return bool
-func IsSuperAdmin() bool {
-	// get the role from the context
-	roles := Store.GetCtxValue("roles")
-
-	// check if the roles contains superadmin
-	for _, role := range roles.([]string) {
-		if role == "superadmin" {
-			return true
-		}
-	}
-
-	// check if the role is admin
-	return false
 }

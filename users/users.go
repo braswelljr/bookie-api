@@ -2,7 +2,6 @@ package users
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/go-playground/validator/v10"
@@ -22,7 +21,6 @@ import (
 //
 // encore:api private method=POST path=/users/create
 func Create(ctx context.Context, payload *store.SignupPayload) (*store.User, error) {
-
 	// create user
 	user, err := store.Create(ctx, payload)
 	if err != nil {
@@ -41,6 +39,17 @@ func Create(ctx context.Context, payload *store.SignupPayload) (*store.User, err
 //
 // encore:api auth method=PATCH path=/users/update/:id
 func Update(ctx context.Context, id string, payload store.UpdatePayload) (*store.UserUpdateResponse, error) {
+	// check if the user matches the authenticated user
+	claims, err := middleware.GetVerifiedClaims(ctx, "")
+	if err != nil {
+		return &store.UserUpdateResponse{}, err
+	}
+
+	// check if the user is authorized to perform this action
+	if claims.Subject.ID != id {
+		return &store.UserUpdateResponse{}, fmt.Errorf("unauthorized: you are not authorized to perform this action")
+	}
+
 	// validate user details
 	if err := validator.New().Struct(payload); err != nil {
 		return &store.UserUpdateResponse{}, err
@@ -83,20 +92,21 @@ func Get(ctx context.Context, id string) (*store.User, error) {
 //	@return user
 //	@return error
 //
-// encore:api auth method=PATCH path=/users/update-role-to-admin
-func UpdateRole(ctx context.Context, payload *store.UpdateRolePayload) error {
+// encore:api auth method=PATCH path=/users/:id/update-role-to-admin
+func UpdateRole(ctx context.Context, id string) error {
 	// check if user is admin or superadmin
-	if !middleware.IsAdmin() && !middleware.IsSuperAdmin() {
-		return errors.New("unauthorized: you are not authorized to perform this action")
-	}
-
-	// validate user details
-	if err := validator.New().Struct(payload); err != nil {
+	claims, err := middleware.GetVerifiedClaims(ctx, "")
+	if err != nil {
 		return err
 	}
 
+	// check for the roles
+	if !claims.HasRole(middleware.RoleSuperAdmin, middleware.RoleAdmin) {
+		return fmt.Errorf("unauthorized: you are not authorized to perform this action")
+	}
+
 	// update user
-	if err := store.UpdateRole(ctx, payload, "admin"); err != nil {
+	if err := store.UpdateRole(ctx, id, middleware.RoleAdmin); err != nil {
 		return err
 	}
 
@@ -112,6 +122,16 @@ func UpdateRole(ctx context.Context, payload *store.UpdateRolePayload) error {
 //
 // encore:api public method=GET path=/users
 func QueryAll(ctx context.Context, options *pagination.Options) (*store.PaginatedUsersResponse, error) {
+	// check if user is admin or superadmin
+	claims, err := middleware.GetVerifiedClaims(ctx, "")
+	if err != nil {
+		return &store.PaginatedUsersResponse{}, err
+	}
+
+	// check for the roles
+	if !claims.HasRole(middleware.RoleSuperAdmin, middleware.RoleAdmin) {
+		return &store.PaginatedUsersResponse{}, fmt.Errorf("unauthorized: you are not authorized to perform this action")
+	}
 	// query users
 	users, err := store.GetAll(ctx, options)
 	if err != nil {

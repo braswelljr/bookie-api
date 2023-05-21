@@ -14,7 +14,7 @@ import (
 //	@param payload - *CreateCategoryPayload
 //
 // encore:api auth method=POST path=/categories/:uid/create
-func Create(ctx context.Context, uid string, payload *store.CreateCategoryPayload) error {
+func Create(_ context.Context, uid string, payload *store.CreateCategoryPayload) error {
 	// validate payload
 	if err := validator.New().Struct(payload); err != nil {
 		return err

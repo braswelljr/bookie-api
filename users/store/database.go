@@ -201,9 +201,9 @@ func Update(ctx context.Context, id string, payload UpdatePayload) error {
 //	@param role
 //	@return user
 //	@return error
-func UpdateRole(ctx context.Context, payload *UpdateRolePayload, role string) error {
+func UpdateRole(ctx context.Context, id string, role string) error {
 	// query user from database
-	user, err := GetWithID(ctx, payload.ID)
+	user, err := GetWithID(ctx, id)
 	if err != nil {
 		return err
 	}

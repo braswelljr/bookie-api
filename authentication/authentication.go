@@ -51,17 +51,6 @@ func Signup(ctx context.Context, payload *us.SignupPayload) (*store.Response, er
 		return &store.Response{}, errors.New("authentication failed: unable to generate token")
 	}
 
-	// set the user id and token in the context and check if the values were set successfully
-	if err := middleware.Store.SetCtxValue("uid", user.ID); err != nil {
-		return &store.Response{}, errors.New("authentication failed: unable to set context value")
-	}
-	if err = middleware.Store.SetCtxValue("token", token); err != nil {
-		return &store.Response{}, errors.New("authentication failed: unable to set context value")
-	}
-	if err = middleware.Store.SetCtxValue("roles", []string{user.Role}); err != nil {
-		return &store.Response{}, errors.New("authentication failed: unable to set context value")
-	}
-
 	// return the response
 	return &store.Response{
 		Message: "Signup successful",
@@ -125,17 +114,6 @@ func Login(ctx context.Context, payload *store.LoginPayload) (*store.Response, e
 		return &store.Response{}, errors.New("authentication failed: unable to generate token")
 	}
 
-	// set the user id and token in the context and check if the values were set successfully
-	if err := middleware.Store.SetCtxValue("uid", user.ID); err != nil {
-		return &store.Response{}, errors.New("authentication failed: unable to set context value")
-	}
-	if err := middleware.Store.SetCtxValue("token", token); err != nil {
-		return &store.Response{}, errors.New("authentication failed: unable to set context value")
-	}
-	if err := middleware.Store.SetCtxValue("roles", []string{user.Role}); err != nil {
-		return &store.Response{}, errors.New("authentication failed: unable to set context value")
-	}
-
 	return &store.Response{
 		Message: "Login successful",
 		Token:   token,
@@ -164,16 +142,6 @@ func Login(ctx context.Context, payload *store.LoginPayload) (*store.Response, e
 //
 // encore:api public method=POST path=/logout
 func Logout(_ context.Context) (*store.Response, error) {
-	// set the user id and token in the context and check if the values were set successfully
-	if err := middleware.Store.SetCtxValue("uid", ""); err != nil {
-		return &store.Response{}, errors.New("authentication failed: unable to set context value")
-	}
-	if err := middleware.Store.SetCtxValue("token", ""); err != nil {
-		return &store.Response{}, errors.New("authentication failed: unable to set context value")
-	}
-	if err := middleware.Store.SetCtxValue("roles", []string{}); err != nil {
-		return &store.Response{}, errors.New("authentication failed: unable to set context value")
-	}
 
 	return &store.Response{
 		Message: "Logout successful",
@@ -191,40 +159,20 @@ func Logout(_ context.Context) (*store.Response, error) {
 //	@return error
 //
 // encore:authhandler
-func Auth(ctx context.Context, token string) (auth.UID, *store.UserResponse, error) {
+func Auth(_ context.Context, token string) (auth.UID, *middleware.DataI, error) {
 	// check for empty token
 	if len(strings.TrimSpace(token)) < 1 {
-		return "", &store.UserResponse{}, errors.New("authentication failed: token is empty")
+		return "", &middleware.DataI{}, errors.New("authentication failed: token is empty")
 	}
 
 	// validate token
 	claims, err := middleware.ValidateToken(token)
 	if err != nil {
-		return "", &store.UserResponse{}, errors.New("authentication failed: invalid token")
+		return "", &middleware.DataI{}, errors.New("authentication failed: invalid token")
 	}
 
-	// get the user
-	user, err := us.GetWithID(ctx, claims.User.ID)
-	if err != nil {
-		return "", &store.UserResponse{}, errors.New("authentication failed: unable to get user")
-	}
-
-	// set the user id and token, role in the context
-	_ = middleware.Store.SetCtxValue("uid", user.ID)
-	_ = middleware.Store.SetCtxValue("token", token)
-	_ = middleware.Store.SetCtxValue("role", user.Role)
-
-	return auth.UID(claims.User.Role), &store.UserResponse{
-		ID:          user.ID,
-		Firstname:   user.Firstname,
-		Lastname:    user.Lastname,
-		Othernames:  user.Othernames,
-		Username:    user.Username,
-		Email:       user.Email,
-		DateOfBirth: user.DateOfBirth,
-		Phone:       user.Phone,
-		Role:        user.Role,
-		CreatedAt:   user.CreatedAt,
-		UpdatedAt:   user.UpdatedAt,
+	return auth.UID(claims.User.ID), &middleware.DataI{
+		Subject: claims.User,
+		Roles:   []string{claims.User.Role},
 	}, nil
 }

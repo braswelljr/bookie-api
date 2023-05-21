@@ -25,6 +25,11 @@ test:
 deploy:
 	git push encore
 
+.PHONY: upgrade-deps
+upgrade-deps:
+	go get -u ./...
+	go mod tidy
+
 .PHONY: fix
 fix: ## Fix lint violations
 	gofmt -s -w .
