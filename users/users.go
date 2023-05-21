@@ -30,6 +30,77 @@ func Create(ctx context.Context, payload *store.SignupPayload) (*store.User, err
 	return user, nil
 }
 
+// QueryAll - Get all users
+//
+//	@param ctx - context.Context
+//	@return users
+//	@return error
+//
+// encore:api public method=GET path=/users
+func QueryAll(ctx context.Context, options *pagination.Options) (*store.PaginatedUsersResponse, error) {
+	// check if user is admin or superadmin
+	claims, err := middleware.GetVerifiedClaims(ctx, "")
+	if err != nil {
+		return &store.PaginatedUsersResponse{}, err
+	}
+
+	// check for the roles
+	if !claims.HasRole(middleware.RoleSuperAdmin, middleware.RoleAdmin) {
+		return &store.PaginatedUsersResponse{}, fmt.Errorf("unauthorized: you are not authorized to perform this action")
+	}
+	// query users
+	users, err := store.GetAll(ctx, options)
+	if err != nil {
+		return &store.PaginatedUsersResponse{}, fmt.Errorf("querying users: %w", err)
+	}
+
+	// return users, nil
+	return users, nil
+}
+
+// Get - Get a user
+//
+//	@param ctx - context.Context
+//	@param id
+//	@return user
+//	@return error
+//
+// encore:api public method=GET path=/users/:id tag:cache
+func Get(ctx context.Context, id string) (*store.User, error) {
+	// get user
+	user, err := store.GetWithID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// return user
+	return user, nil
+}
+
+// Delete - Delete a user
+//
+//	@param ctx - context.Context
+//	@param id
+//	@return error
+//
+// encore:api auth method=DELETE path=/users/:id
+func Delete(ctx context.Context, id string) error {
+	// delete user
+	if err := store.Delete(ctx, id); err != nil {
+		return err
+	}
+
+	// publish delete user's tasks event
+	if _, err := events.DeleteAllUserTasks.Publish(ctx, &events.DeleteAllUserTasksEvent{
+		UserID: id,
+	}); err != nil {
+		return err
+	}
+
+	// return nil on a delete event
+	return nil
+}
+
 // Update - Updates a user
 //
 //	@param ctx - context.Context
@@ -65,25 +136,6 @@ func Update(ctx context.Context, id string, payload store.UpdatePayload) (*store
 	}, nil
 }
 
-// Get - Get a user
-//
-//	@param ctx - context.Context
-//	@param id
-//	@return user
-//	@return error
-//
-// encore:api public method=GET path=/users/:id tag:cache
-func Get(ctx context.Context, id string) (*store.User, error) {
-	// get user
-	user, err := store.GetWithID(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-
-	// return user
-	return user, nil
-}
-
 // UpdateRole - Updates a user's role
 //
 //	@param ctx - context.Context
@@ -92,7 +144,7 @@ func Get(ctx context.Context, id string) (*store.User, error) {
 //	@return user
 //	@return error
 //
-// encore:api auth method=PATCH path=/users/:id/update-role-to-admin
+// encore:api auth method=PATCH path=/users/update/:id/role-to-admin
 func UpdateRole(ctx context.Context, id string) error {
 	// check if user is admin or superadmin
 	claims, err := middleware.GetVerifiedClaims(ctx, "")
@@ -111,57 +163,5 @@ func UpdateRole(ctx context.Context, id string) error {
 	}
 
 	// return user
-	return nil
-}
-
-// QueryAll - Get all users
-//
-//	@param ctx - context.Context
-//	@return users
-//	@return error
-//
-// encore:api public method=GET path=/users
-func QueryAll(ctx context.Context, options *pagination.Options) (*store.PaginatedUsersResponse, error) {
-	// check if user is admin or superadmin
-	claims, err := middleware.GetVerifiedClaims(ctx, "")
-	if err != nil {
-		return &store.PaginatedUsersResponse{}, err
-	}
-
-	// check for the roles
-	if !claims.HasRole(middleware.RoleSuperAdmin, middleware.RoleAdmin) {
-		return &store.PaginatedUsersResponse{}, fmt.Errorf("unauthorized: you are not authorized to perform this action")
-	}
-	// query users
-	users, err := store.GetAll(ctx, options)
-	if err != nil {
-		return &store.PaginatedUsersResponse{}, fmt.Errorf("querying users: %w", err)
-	}
-
-	// return users, nil
-	return users, nil
-}
-
-// Delete - Delete a user
-//
-//	@param ctx - context.Context
-//	@param id
-//	@return error
-//
-// encore:api auth method=DELETE path=/users/:id
-func Delete(ctx context.Context, id string) error {
-	// delete user
-	if err := store.Delete(ctx, id); err != nil {
-		return err
-	}
-
-	// publish delete user's tasks event
-	if _, err := events.DeleteAllUserTasks.Publish(ctx, &events.DeleteAllUserTasksEvent{
-		UserID: id,
-	}); err != nil {
-		return err
-	}
-
-	// return nil on a delete event
 	return nil
 }
