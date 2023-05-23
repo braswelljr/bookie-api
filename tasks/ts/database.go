@@ -1,4 +1,4 @@
-package store
+package ts
 
 import (
 	"context"
@@ -105,7 +105,11 @@ func Create(ctx context.Context, id string, payload *CreateTaskPayload) error {
 	task.UpdatedAt = time.Now()
 
 	// query statement to be executed
-	q := `INSERT INTO tasks (id, uid, title, description, status, pinned, archived, color, createdAt, updatedAt) VALUES (:id, :uid, :title, :description, :status, :pinned, :archived, :color, :createdAt, :updatedAt) RETURNING *`
+	q := `
+    INSERT INTO tasks (id, uid, title, description, status, pinned, archived, color, created_at, updated_at) 
+    VALUES (:id, :uid, :title, :description, :status, :pinned, :archived, :color, :created_at, :updated_at) 
+    RETURNING *
+  `
 
 	// execute query
 	if err := database.NamedExecQuery(ctx, tasksDatabase, q, task); err != nil {
@@ -144,14 +148,14 @@ func Get(ctx context.Context, id string) (*Task, error) {
 // @return tasks
 // @return error
 func GetMany(ctx context.Context, ids []string) ([]Task, error) {
-  // check if task exists
-  tasks, err := FindManyByField(ctx, "id", "=", ids)
-  if err != nil {
-    return nil, fmt.Errorf("selecting task: %w", err)
-  }
+	// check if task exists
+	tasks, err := FindManyByField(ctx, "id", "=", ids)
+	if err != nil {
+		return nil, fmt.Errorf("selecting task: %w", err)
+	}
 
-  // return task
-  return tasks, nil
+	// return task
+	return tasks, nil
 }
 
 // Delete - Delete is a function that deletes a task.
@@ -256,7 +260,7 @@ func Update(ctx context.Context, id string, payload *UpdateTaskPayload) error {
 	// create query fields
 	var ks []string
 
-	fields["updatedAt"] = time.Now().UTC()
+	fields["updated_at"] = time.Now().UTC()
 	fields["id"] = task.ID
 
 	// loop through fields and create query fields
@@ -316,7 +320,7 @@ func GetUserTasks(ctx context.Context, uid string, options *pagination.Options) 
 	query := `
     SELECT * FROM tasks
     WHERE uid = :uid
-    ORDER BY createdAt
+    ORDER BY created_at
     DESC LIMIT :limit OFFSET :offset
   `
 
@@ -358,7 +362,7 @@ func ToggleComplete(ctx context.Context, id string) error {
 	// query statement to be executed
 	query := `
     UPDATE tasks 
-    SET completed = :completed, completedAt = :completedAt, updatedAt = :updatedAt 
+    SET completed = :completed, completed_at = :completed_at, updated_at = :updated_at  
     WHERE id = :id
   `
 
@@ -385,16 +389,16 @@ func ToggleMultipleComplete(ctx context.Context, ids []string) error {
 	// query statement to be executed
 	query := `
     UPDATE tasks 
-    SET completed = :completed, completedAt = :completedAt, updatedAt = :updatedAt 
+    SET completed = :completed, completed_at = :completed_at, updated_at = :updated_at 
     WHERE id = ANY(:ids)
   `
 
 	// execute query
 	if err := database.NamedExecQuery(ctx, tasksDatabase, query, map[string]interface{}{
-		"ids":         ids,
-		"completed":   true,
-		"completedAt": time.Now().UTC(),
-		"updatedAt":   time.Now().UTC(),
+		"ids":          ids,
+		"completed":    true,
+		"completed_at": time.Now().UTC(),
+		"updated_at":   time.Now().UTC(),
 	}); err != nil {
 		return fmt.Errorf("updating tasks: %w", err)
 	}
@@ -402,5 +406,3 @@ func ToggleMultipleComplete(ctx context.Context, ids []string) error {
 	// return task
 	return nil
 }
-
-//

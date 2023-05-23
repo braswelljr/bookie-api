@@ -84,10 +84,10 @@ func Create(ctx context.Context, payload *SignupPayload) (*User, error) {
 	// create query
 	query := `
     INSERT INTO users (
-      id, firstname, lastname, othernames, username, email, dateOfBirth, password, phone, address, city, country, role, createdAt, updatedAt
+      id, firstname, lastname, othernames, username, email, date_of_birth, password, phone, role, created_at, updated_at
     ) 
     VALUES (
-      :id, :firstname, :lastname, :othernames, :username, :email, :dateOfBirth, :password, :phone, :address, :city, :country, :role, :createdAt, :updatedAt
+      :id, :firstname, :lastname, :othernames, :username, :email, :date_of_birth, :password, :phone, :role, :created_at, :updated_at
     )
   `
 	// ON CONFLICT (email) DO NOTHING
@@ -99,7 +99,7 @@ func Create(ctx context.Context, payload *SignupPayload) (*User, error) {
 	}
 
 	// query user from database
-	usr, err := FindOneByField(ctx, "ID", "=", user.ID)
+	usr, err := FindOneByField(ctx, "id", "=", user.ID)
 	if err != nil {
 		return &User{}, err
 	}
@@ -175,7 +175,7 @@ func Update(ctx context.Context, id string, payload UpdatePayload) error {
 	// create query fields
 	var ks []string
 
-	fields["updatedAt"] = time.Now().UTC()
+	fields["updated_at"] = time.Now().UTC()
 	fields["id"] = user.ID
 
 	// loop through fields and create query fields
@@ -209,10 +209,10 @@ func UpdateRole(ctx context.Context, id string, role string) error {
 	}
 
 	// update user in database
-	if err := database.NamedExecQuery(ctx, usersDatabase, "UPDATE users SET role = :role, updatedAt = :updatedAt WHERE id = :id", map[string]interface{}{
-		"role":      role,
-		"updatedAt": time.Now().UTC(),
-		"id":        user.ID,
+	if err := database.NamedExecQuery(ctx, usersDatabase, "UPDATE users SET role = :role, updated_at = :updated_at WHERE id = :id", map[string]interface{}{
+		"role":       role,
+		"updated_at": time.Now().UTC(),
+		"id":         user.ID,
 	}); err != nil {
 		return err
 	}

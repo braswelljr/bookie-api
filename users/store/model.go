@@ -11,12 +11,12 @@ type User struct {
 	Othernames  string    `json:"othernames" db:"othernames"`
 	Username    string    `json:"username" db:"username"`
 	Email       string    `json:"email" db:"email"`
-	DateOfBirth string    `json:"dateOfBirth" db:"dateOfBirth"`
+	DateOfBirth string    `json:"dateOfBirth" db:"date_of_birth"`
 	Password    string    `json:"password" db:"password"`
 	Phone       string    `json:"phone" db:"phone"`
 	Role        string    `json:"role" db:"role"`
-	CreatedAt   time.Time `json:"createdAt" db:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt" db:"updatedAt"`
+	CreatedAt   time.Time `json:"createdAt" db:"created_at"`
+	UpdatedAt   time.Time `json:"updatedAt" db:"updated_at"`
 }
 
 type SignupPayload struct {
@@ -24,7 +24,7 @@ type SignupPayload struct {
 	Lastname    string `json:"lastname" validate:"required"`         // required
 	Othernames  string `json:"othernames" validate:"omitempty"`      // optional
 	Username    string `json:"username" validate:"required"`         // required
-	DateOfBirth string `json:"dateOfBirth" validate:"required"`      // required
+	DateOfBirth string `json:"dateOfBirth" validate:"omitempty"`     // optional
 	Email       string `json:"email" validate:"required,email"`      // required
 	Password    string `json:"password" validate:"required" min:"8"` // required
 	Phone       string `json:"phone" validate:"required"`            // required
