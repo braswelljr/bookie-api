@@ -76,72 +76,11 @@ func Signup(ctx context.Context, payload *us.SignupPayload) (*store.Response, er
 // Login - Login is a function that handles the login process for a user.
 //
 //	@route POST /login
-//	@param ctx - context.Context
-//	@param payload
-//	@return response
-//	@return error
-func Login(ctx context.Context, payload *store.LoginPayload) (*store.Response, error) {
-	// validate user details
-	if err := validator.New().Struct(payload); err != nil {
-		return &store.Response{}, err
-	}
-
-	// get the user
-	user, err := us.Get(ctx, payload.Email)
-	if err != nil {
-		return &store.Response{}, errors.New("authentication failed: user does not exist")
-	}
-
-	// check if the password is correct
-	isCorrect, err := middleware.ComparePasswords(user.Password, payload.Password)
-	if err != nil || !isCorrect {
-		return &store.Response{}, errors.New("authentication failed: incorrect password")
-	}
-
-	// generate tokens
-	token, err := middleware.GetToken(&middleware.User{
-		ID:          user.ID,
-		Firstname:   user.Firstname,
-		Lastname:    user.Lastname,
-		Othernames:  user.Othernames,
-		Username:    user.Username,
-		Email:       user.Email,
-		DateOfBirth: user.DateOfBirth,
-		Phone:       user.Phone,
-		Role:        user.Role,
-	})
-	if err != nil {
-		return &store.Response{}, errors.New("authentication failed: unable to generate token")
-	}
-
-	return &store.Response{
-		Message: "Login successful",
-		Token:   token,
-		Code:    http.StatusOK,
-		Payload: &store.UserResponse{
-			ID:          user.ID,
-			Firstname:   user.Firstname,
-			Lastname:    user.Lastname,
-			Othernames:  user.Othernames,
-			Username:    user.Username,
-			Email:       user.Email,
-			DateOfBirth: user.DateOfBirth,
-			Phone:       user.Phone,
-			Role:        user.Role,
-			CreatedAt:   user.CreatedAt,
-			UpdatedAt:   user.UpdatedAt,
-		},
-	}, nil
-}
-
-// Login_ - Login_ is a function that handles the login process for a user.
-//
-//	@route POST /login
 //	@param w http.ResponseWriter
 //	@param req *http.Request
 //
 // encore:api public raw method=POST path=/login
-func Login_(w http.ResponseWriter, req *http.Request) {
+func Login(w http.ResponseWriter, req *http.Request) {
 	// Set headers for general response
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
