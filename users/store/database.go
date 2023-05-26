@@ -71,6 +71,16 @@ func Create(ctx context.Context, payload *SignupPayload) (*User, error) {
 	user.Phone = strings.TrimSpace(payload.Phone)
 	user.Role = middleware.RoleSuperAdmin
 
+	// check if user exists with email
+	if _, err := FindOneByField(ctx, "email", "=", user.Email); err == nil {
+		return &User{}, fmt.Errorf("user with email %v already exists", user.Email)
+	}
+
+	// check if user exists with username
+	if _, err := FindOneByField(ctx, "username", "=", user.Username); err == nil {
+		return &User{}, fmt.Errorf("user with username %v already exists", user.Username)
+	}
+
 	// hash password
 	password, err := middleware.HashPassword(payload.Password)
 	if err != nil {
