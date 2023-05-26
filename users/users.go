@@ -48,6 +48,7 @@ func QueryAll(ctx context.Context, options *pagination.Options) (*store.Paginate
 	if !claims.HasRole(middleware.RoleSuperAdmin, middleware.RoleAdmin) {
 		return &store.PaginatedUsersResponse{}, fmt.Errorf("unauthorized: you are not authorized to perform this action")
 	}
+
 	// query users
 	users, err := store.GetAll(ctx, options)
 	if err != nil {
@@ -65,8 +66,19 @@ func QueryAll(ctx context.Context, options *pagination.Options) (*store.Paginate
 //	@return user
 //	@return error
 //
-// encore:api public method=GET path=/users/:id tag:cache
+// encore:api auth method=GET path=/users/:id tag:cache
 func Get(ctx context.Context, id string) (*store.User, error) {
+	// check for claims
+	claims, err := middleware.GetVerifiedClaims(ctx, "")
+	if err != nil {
+		return &store.User{}, err
+	}
+
+	// check for the roles
+	if !claims.HasRole(middleware.RoleSuperAdmin, middleware.RoleAdmin) || claims.Subject.ID != id {
+		return &store.User{}, fmt.Errorf("unauthorized: you are not authorized to perform this action")
+	}
+
 	// get user
 	user, err := store.GetWithID(ctx, id)
 	if err != nil {
@@ -85,6 +97,17 @@ func Get(ctx context.Context, id string) (*store.User, error) {
 //
 // encore:api auth method=DELETE path=/users/:id
 func Delete(ctx context.Context, id string) error {
+	// check for claims
+	claims, err := middleware.GetVerifiedClaims(ctx, "")
+	if err != nil {
+		return err
+	}
+
+	// check for the roles
+	if !claims.HasRole(middleware.RoleSuperAdmin) || claims.Subject.ID != id {
+		return fmt.Errorf("unauthorized: you are not authorized to perform this action")
+	}
+
 	// delete user
 	if err := store.Delete(ctx, id); err != nil {
 		return err

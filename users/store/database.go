@@ -69,7 +69,7 @@ func Create(ctx context.Context, payload *SignupPayload) (*User, error) {
 	user.Email = strings.TrimSpace(payload.Email)
 	user.DateOfBirth = payload.DateOfBirth
 	user.Phone = strings.TrimSpace(payload.Phone)
-	user.Role = "superadmin"
+	user.Role = middleware.RoleSuperAdmin
 
 	// hash password
 	password, err := middleware.HashPassword(payload.Password)
