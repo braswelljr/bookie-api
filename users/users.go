@@ -66,7 +66,7 @@ func QueryAll(ctx context.Context, options *pagination.Options) (*store.Paginate
 //	@return user
 //	@return error
 //
-// encore:api auth method=GET path=/users/:id tag:cache
+// encore:api auth method=GET path=/users/:id
 func Get(ctx context.Context, id string) (*store.User, error) {
 	// check for claims
 	claims, err := middleware.GetVerifiedClaims(ctx, "")

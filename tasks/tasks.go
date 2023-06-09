@@ -48,7 +48,7 @@ func CreateTask(ctx context.Context, uid string, payload *ts.CreateTaskPayload) 
 // @return task
 // @return error
 //
-// encore:api public method=GET path=/tasks/:id
+// encore:api public method=GET path=/tasks/get/:id
 func GetTask(ctx context.Context, id string) (*ts.Task, error) {
 	// get task
 	task, err := ts.Get(ctx, id)
@@ -67,7 +67,7 @@ func GetTask(ctx context.Context, id string) (*ts.Task, error) {
 // @return task
 // @return error
 //
-// encore:api auth method=PATCH path=/tasks/:id
+// encore:api auth method=PATCH path=/tasks/update/:id
 func UpdateTask(ctx context.Context, id string, payload *ts.UpdateTaskPayload) error {
 	// validate payload
 	if err := validator.New().Struct(payload); err != nil {
@@ -90,10 +90,27 @@ func UpdateTask(ctx context.Context, id string, payload *ts.UpdateTaskPayload) e
 // @return task
 // @return error
 //
-// encore:api auth method=DELETE path=/tasks/:id
+// encore:api auth method=DELETE path=/tasks/delete/:id
 func DeleteTask(ctx context.Context, id string) error {
 	// delete task
 	if err := ts.Delete(ctx, id); err != nil {
+		return err
+	}
+
+	// return nil if no error
+	return nil
+}
+
+// ToggleMultipleComplete - Toggle multiple tasks' complete status
+//
+// @param ctx - context.Context
+// @param {*ts.ToggleMultipleTasksCompletePayload} ids - ids of tasks to toggle
+// @return error
+//
+// encore:api auth method=PATCH path=/tasks/toggle/all/complete
+func ToggleMultipleTaskComplete(ctx context.Context, ids *ts.MultiIdsPayload) error {
+	// toggle complete
+	if err := ts.ToggleMultipleComplete(ctx, ids.Ids); err != nil {
 		return err
 	}
 
@@ -108,27 +125,10 @@ func DeleteTask(ctx context.Context, id string) error {
 // @return task
 // @return error
 //
-// encore:api auth method=PATCH path=/tasks/toggle-complete/:id
+// encore:api auth method=PATCH path=/tasks/toggle/complete/:id
 func ToggleTaskComplete(ctx context.Context, id string) error {
 	// toggle complete
 	if err := ts.ToggleComplete(ctx, id); err != nil {
-		return err
-	}
-
-	// return nil if no error
-	return nil
-}
-
-// ToggleMultipleComplete - Toggle multiple tasks' complete status
-//
-// @param ctx - context.Context
-// @param {*ts.ToggleMultipleTasksCompletePayload} ids - ids of tasks to toggle
-// @return error
-//
-// encore:api auth method=PATCH path=/tasks/toggle-complete/multiple
-func ToggleMultipleTaskComplete(ctx context.Context, ids *ts.MultiIdsPayload) error {
-	// toggle complete
-	if err := ts.ToggleMultipleComplete(ctx, ids.Ids); err != nil {
 		return err
 	}
 
