@@ -108,7 +108,7 @@ func DeleteTask(ctx context.Context, id string) error {
 // @return task
 // @return error
 //
-// encore:api auth method=PATCH path=/tasks/:id/toggle-complete
+// encore:api auth method=PATCH path=/tasks/toggle-complete/:id
 func ToggleTaskComplete(ctx context.Context, id string) error {
 	// toggle complete
 	if err := ts.ToggleComplete(ctx, id); err != nil {
