@@ -344,3 +344,26 @@ func GetUserCategories(ctx context.Context, uid string, options *pagination.Opti
 		Categories:  categories,
 	}, nil
 }
+
+// DeleteAllUserCategories - DeleteAllUserCategories is a function that deletes all categories with a user ID.
+//
+// @param ctx - context.Context
+// @param uid - string
+// @return error
+func DeleteAllUserCategories(ctx context.Context, uid string) error {
+	// query statement to be executed
+	q := `
+    DELETE FROM categories
+    WHERE uid = :uid
+  `
+
+	// execute query
+	if err := database.NamedExecQuery(ctx, categoriesDatabase, q, map[string]interface{}{
+		"uid": uid,
+	}); err != nil {
+		return fmt.Errorf("deleting categories: %w", err)
+	}
+
+	// Delete was successful
+	return nil
+}

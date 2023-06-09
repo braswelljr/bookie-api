@@ -22,7 +22,7 @@ import (
 // @return error
 //
 // encore:api auth method=POST path=/tasks/:uid/create
-func Create(ctx context.Context, uid string, payload *ts.CreateTaskPayload) error {
+func CreateTask(ctx context.Context, uid string, payload *ts.CreateTaskPayload) error {
 	// validate payload
 	if err := validator.New().Struct(payload); err != nil {
 		return err
@@ -49,7 +49,7 @@ func Create(ctx context.Context, uid string, payload *ts.CreateTaskPayload) erro
 // @return error
 //
 // encore:api public method=GET path=/tasks/:id
-func Get(ctx context.Context, id string) (*ts.Task, error) {
+func GetTask(ctx context.Context, id string) (*ts.Task, error) {
 	// get task
 	task, err := ts.Get(ctx, id)
 	if err != nil {
@@ -68,7 +68,7 @@ func Get(ctx context.Context, id string) (*ts.Task, error) {
 // @return error
 //
 // encore:api auth method=PATCH path=/tasks/:id
-func Update(ctx context.Context, id string, payload *ts.UpdateTaskPayload) error {
+func UpdateTask(ctx context.Context, id string, payload *ts.UpdateTaskPayload) error {
 	// validate payload
 	if err := validator.New().Struct(payload); err != nil {
 		return err
@@ -91,7 +91,7 @@ func Update(ctx context.Context, id string, payload *ts.UpdateTaskPayload) error
 // @return error
 //
 // encore:api auth method=DELETE path=/tasks/:id
-func Delete(ctx context.Context, id string) error {
+func DeleteTask(ctx context.Context, id string) error {
 	// delete task
 	if err := ts.Delete(ctx, id); err != nil {
 		return err
@@ -109,7 +109,7 @@ func Delete(ctx context.Context, id string) error {
 // @return error
 //
 // encore:api auth method=PATCH path=/tasks/:id/toggle-complete
-func ToggleComplete(ctx context.Context, id string) error {
+func ToggleTaskComplete(ctx context.Context, id string) error {
 	// toggle complete
 	if err := ts.ToggleComplete(ctx, id); err != nil {
 		return err
@@ -119,22 +119,22 @@ func ToggleComplete(ctx context.Context, id string) error {
 	return nil
 }
 
-// // ToggleMultipleComplete - Toggle multiple tasks' complete status
-// //
-// // @param ctx - context.Context
-// // @param {*ts.ToggleMultipleTasksCompletePayload} ids - ids of tasks to toggle
-// // @return error
-// //
-// // encore:api auth method=PATCH path=/tasks/toggle-complete/multiple
-// func ToggleMultipleComplete(ctx context.Context, ids *ts.MultiIdsPayload) error {
-// 	// toggle complete
-// 	if err := ts.ToggleMultipleComplete(ctx, ids.Ids); err != nil {
-// 		return err
-// 	}
+// ToggleMultipleComplete - Toggle multiple tasks' complete status
+//
+// @param ctx - context.Context
+// @param {*ts.ToggleMultipleTasksCompletePayload} ids - ids of tasks to toggle
+// @return error
+//
+// encore:api auth method=PATCH path=/tasks/toggle-complete/multiple
+func ToggleMultipleTaskComplete(ctx context.Context, ids *ts.MultiIdsPayload) error {
+	// toggle complete
+	if err := ts.ToggleMultipleComplete(ctx, ids.Ids); err != nil {
+		return err
+	}
 
-// 	// return nil if no error
-// 	return nil
-// }
+	// return nil if no error
+	return nil
+}
 
 // GetUserTasks - Get all tasks for a user
 //
@@ -163,7 +163,7 @@ func GetUserTasks(ctx context.Context, uid string, options *pagination.Options) 
 // @return error
 //
 // encore:api auth method=DELETE path=/users/:uid/tasks/delete
-func DeleteAllWithUserID(ctx context.Context, uid string) error {
+func DeleteAllTasksWithUserID(ctx context.Context, uid string) error {
 	// delete tasks
 	if err := ts.DeleteAllWithUserID(ctx, uid); err != nil {
 		return err
@@ -182,7 +182,7 @@ var _ = pubsub.NewSubscription(
 	"delete-all-tasks-with-user-id",
 	pubsub.SubscriptionConfig[*events.DeleteAllUserTasksEvent]{
 		Handler: func(ctx context.Context, event *events.DeleteAllUserTasksEvent) error {
-			return DeleteAllWithUserID(ctx, event.UserID)
+			return DeleteAllTasksWithUserID(ctx, event.UserID)
 		},
 	},
 )
@@ -190,13 +190,14 @@ var _ = pubsub.NewSubscription(
 // =====================================================================================================================
 // CATEGORY
 // =====================================================================================================================
+
 // Create - Create a new category
 //
 //	@param ctx - context.Context
 //	@param payload - *CreateCategoryPayload
 //
 // encore:api auth method=POST path=/categories/:uid/create
-func Create_(ctx context.Context, uid string, payload *cs.CreateCategoryPayload) error {
+func CreateCategory(ctx context.Context, uid string, payload *cs.CreateCategoryPayload) error {
 	// validate payload
 	if err := validator.New().Struct(payload); err != nil {
 		return err
@@ -218,7 +219,7 @@ func Create_(ctx context.Context, uid string, payload *cs.CreateCategoryPayload)
 //	@return error
 //
 // encore:api public method=GET path=/categories/:id
-func Get_(ctx context.Context, id string) (*cs.Category, error) {
+func GetCategory(ctx context.Context, id string) (*cs.Category, error) {
 	// get category
 	category, err := cs.Get(ctx, id)
 	if err != nil {
@@ -237,7 +238,7 @@ func Get_(ctx context.Context, id string) (*cs.Category, error) {
 //	@return error
 //
 // encore:api auth method=PATCH path=/categories/:id
-func Update_(ctx context.Context, id string, payload *cs.UpdateCategoryPayload) error {
+func UpdateCategory(ctx context.Context, id string, payload *cs.UpdateCategoryPayload) error {
 	// validate payload
 	if err := validator.New().Struct(payload); err != nil {
 		return err
@@ -259,7 +260,7 @@ func Update_(ctx context.Context, id string, payload *cs.UpdateCategoryPayload) 
 //	@return error
 //
 // encore:api auth method=DELETE path=/categories/:id
-func Delete_(ctx context.Context, id string) error {
+func DeleteCategory(ctx context.Context, id string) error {
 	// delete category
 	if err := cs.Delete(ctx, id); err != nil {
 		return err
@@ -287,3 +288,24 @@ func GetUserCategories(ctx context.Context, uid string, options *pagination.Opti
 	// return categories and nil if no error
 	return categories, nil
 }
+
+// DeleteAllUserCategories - Delete all categories for a user
+//
+//	@param ctx - context.Context
+//	@param uid - string
+//	@return error
+//
+// encore:api auth method=DELETE path=/users/:uid/categories/delete
+func DeleteAllUserCategories(ctx context.Context, uid string) error {
+	// delete categories
+	if err := cs.DeleteAllUserCategories(ctx, uid); err != nil {
+		return err
+	}
+
+	// return nil if no error
+	return nil
+}
+
+// =====================================================================================================================
+// LABEL
+// =====================================================================================================================
