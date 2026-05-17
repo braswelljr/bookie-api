@@ -24,7 +24,7 @@ var usersDatabase = sqlx.NewDb(sqldb.Named("users").Stdlib(), "postgres")
 //	@param ctx - context.Context
 //	@param field - string
 //	@param ops - string
-//	@param value - any | interface{}
+//	@param value - any | any
 //	@return user
 //	@return error
 func FindOneByField(ctx context.Context, field, ops string, value any) (User, error) {
@@ -164,7 +164,7 @@ func Update(ctx context.Context, id string, payload UpdatePayload) error {
 	}
 
 	// map for query fields
-	fields := map[string]interface{}{}
+	fields := map[string]any{}
 
 	// if not empty, update user field
 	vp := reflect.ValueOf(payload)
@@ -219,7 +219,7 @@ func UpdateRole(ctx context.Context, id string, role string) error {
 	}
 
 	// update user in database
-	if err := database.NamedExecQuery(ctx, usersDatabase, "UPDATE users SET role = :role, updated_at = :updated_at WHERE id = :id", map[string]interface{}{
+	if err := database.NamedExecQuery(ctx, usersDatabase, "UPDATE users SET role = :role, updated_at = :updated_at WHERE id = :id", map[string]any{
 		"role":       role,
 		"updated_at": time.Now().UTC(),
 		"id":         user.ID,
@@ -243,7 +243,7 @@ func GetAll(ctx context.Context, pag *pagination.Options) (*PaginatedUsersRespon
 
 	// get total count of users
 	// get count of categories
-	count, err := database.NamedCountQuery(ctx, usersDatabase, countQuery, map[string]interface{}{})
+	count, err := database.NamedCountQuery(ctx, usersDatabase, countQuery, map[string]any{})
 	if err != nil {
 		return nil, fmt.Errorf("getting count of users: %w", err)
 	}
@@ -325,7 +325,7 @@ func Delete(ctx context.Context, id string) error {
 	}
 
 	// delete user from database
-	if err := database.NamedExecQuery(ctx, usersDatabase, "DELETE FROM users WHERE id = :id", map[string]interface{}{
+	if err := database.NamedExecQuery(ctx, usersDatabase, "DELETE FROM users WHERE id = :id", map[string]any{
 		"id": user.ID,
 	}); err != nil {
 		return err

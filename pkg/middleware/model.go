@@ -29,7 +29,7 @@ type SignedParams struct {
 }
 
 // Store Structs
-type CtxKey interface{}
+type CtxKey any
 type CtxValues struct {
-	m map[string]interface{}
+	m map[string]any
 }

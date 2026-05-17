@@ -143,7 +143,7 @@ func queryString(query string, args ...any) string {
 //	@param query - query to execute
 //	@param data - data to bind to the query
 //	@return error - error if any
-func NamedExecQuery(ctx context.Context, db *sqlx.DB, query string, data interface{}) error {
+func NamedExecQuery(ctx context.Context, db *sqlx.DB, query string, data any) error {
 	q := queryString(query, data)
 	rlog.Info("database.NamedExecQuery", "query", q)
 
@@ -165,7 +165,7 @@ func NamedExecQuery(ctx context.Context, db *sqlx.DB, query string, data interfa
 //	@param data - data to bind to the query
 //	@param dest - destination to scan the rows into
 //	@return error - error if any
-func NamedSliceQuery(ctx context.Context, db *sqlx.DB, query string, data interface{}, dest any) error {
+func NamedSliceQuery(ctx context.Context, db *sqlx.DB, query string, data any, dest any) error {
 	// get formated query string
 	q := queryString(query, data)
 	// log query info

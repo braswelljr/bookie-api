@@ -15,8 +15,8 @@ func (v *CtxValues) String() string {
 // GetValue - returns the value of the context key provided.
 //
 // @param key - string
-// @return interface{}
-func (v *CtxValues) GetCtxValue(key string) interface{} {
+// @return any
+func (v *CtxValues) GetCtxValue(key string) any {
 	// check if the key exists in the map
 	if _, ok := v.m[key]; !ok {
 		return nil
@@ -29,8 +29,8 @@ func (v *CtxValues) GetCtxValue(key string) interface{} {
 // SetValue - sets the value of the context key provided.
 //
 // @param key - string
-// @param value - interface{}
-func (v *CtxValues) SetCtxValue(key string, value interface{}) error {
+// @param value - any
+func (v *CtxValues) SetCtxValue(key string, value any) error {
 	// check if the key exists in the map
 	if _, ok := v.m[key]; ok {
 		v.m[key] = value

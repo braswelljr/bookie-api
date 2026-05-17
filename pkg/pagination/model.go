@@ -2,10 +2,10 @@ package pagination
 
 // PaginatedResults - paginated results
 type PaginatedResults struct {
-	Data  []interface{} `json:"data" db:"data"`
-	Page  int           `json:"page" db:"page"`
-	Limit int           `json:"limit" db:"limit"`
-	Total int           `json:"total" db:"total"`
+	Data  []any `json:"data" db:"data"`
+	Page  int   `json:"page" db:"page"`
+	Limit int   `json:"limit" db:"limit"`
+	Total int   `json:"total" db:"total"`
 }
 
 // Query - query

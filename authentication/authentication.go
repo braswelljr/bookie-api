@@ -162,7 +162,7 @@ func Login(w http.ResponseWriter, req *http.Request) {
 
 // writeJSONErrorResponse writes the specified error message as a JSON response with the provided status code.
 func writeJSONErrorResponse(w http.ResponseWriter, message string, statusCode int) {
-	response := map[string]interface{}{
+	response := map[string]any{
 		"message": message,
 		"code":    statusCode,
 		"token":   "",
