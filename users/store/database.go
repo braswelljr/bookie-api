@@ -24,12 +24,12 @@ var usersDatabase = sqlx.NewDb(sqldb.Named("users").Stdlib(), "postgres")
 //	@param ctx - context.Context
 //	@param field - string
 //	@param ops - string
-//	@param value - interface{}
+//	@param value - any | interface{}
 //	@return user
 //	@return error
-func FindOneByField(ctx context.Context, field, ops string, value interface{}) (User, error) {
+func FindOneByField(ctx context.Context, field, ops string, value any) (User, error) {
 	// set the data fields for the query
-	data := map[string]interface{}{
+	data := map[string]any{
 		field: value,
 	}
 

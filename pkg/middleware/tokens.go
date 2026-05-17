@@ -28,7 +28,7 @@ func ValidateToken(token string) (*SignedParams, error) {
 	privateKey := secrets.PrivateKey
 
 	// parse the token
-	parsedToken, err := jwt.ParseWithClaims(token, &SignedParams{}, func(token *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.ParseWithClaims(token, &SignedParams{}, func(token *jwt.Token) (any, error) {
 		return []byte(privateKey), nil
 	})
 	if err != nil {

@@ -23,12 +23,12 @@ var categoriesDatabase = sqlx.NewDb(sqldb.Named("tasks").Stdlib(), "postgres")
 //	@param ctx - context.Context
 //	@param field - string
 //	@param ops - string
-//	@param value - interface{}
+//	@param value - any | interface{}
 //	@return user
 //	@return error
-func FindOneByField(ctx context.Context, field, ops string, value interface{}) (Category, error) {
+func FindOneByField(ctx context.Context, field, ops string, value any) (Category, error) {
 	// set the data fields for the query
-	data := map[string]interface{}{
+	data := map[string]any{
 		field: value,
 	}
 
@@ -55,12 +55,12 @@ func FindOneByField(ctx context.Context, field, ops string, value interface{}) (
 //	@param ctx - context.Context
 //	@param field - string
 //	@param ops - string
-//	@param value - interface{}
+//	@param value - any
 //	@return categories
 //	@return error
-func FindManyByField(ctx context.Context, field, ops string, value interface{}) ([]Category, error) {
+func FindManyByField(ctx context.Context, field, ops string, value any) ([]Category, error) {
 	// set the data fields for the query
-	data := map[string]interface{}{
+	data := map[string]any{
 		field: value,
 	}
 
@@ -166,7 +166,7 @@ func Delete(ctx context.Context, id string) error {
 	q := "DELETE FROM categories WHERE id = :id"
 
 	// execute query
-	if err := database.NamedExecQuery(ctx, categoriesDatabase, q, map[string]interface{}{
+	if err := database.NamedExecQuery(ctx, categoriesDatabase, q, map[string]any{
 		"id": id,
 	}); err != nil {
 		return fmt.Errorf("deleting task: %w", err)
@@ -189,7 +189,7 @@ func DeleteMany(ctx context.Context, ids []string) error {
   `
 
 	// execute query
-	if err := database.NamedExecQuery(ctx, categoriesDatabase, q, map[string]interface{}{
+	if err := database.NamedExecQuery(ctx, categoriesDatabase, q, map[string]any{
 		"ids": ids,
 	}); err != nil {
 		return fmt.Errorf("deleting categories: %w", err)
@@ -212,7 +212,7 @@ func DeleteAllWithUserID(ctx context.Context, id string) error {
   `
 
 	// execute query
-	if err := database.NamedExecQuery(ctx, categoriesDatabase, q, map[string]interface{}{
+	if err := database.NamedExecQuery(ctx, categoriesDatabase, q, map[string]any{
 		"uid": id,
 	}); err != nil {
 		return fmt.Errorf("deleting categories: %w", err)
@@ -237,7 +237,7 @@ func Update(ctx context.Context, id string, payload *UpdateCategoryPayload) erro
 	}
 
 	// map for query fields
-	fields := map[string]interface{}{}
+	fields := map[string]any{}
 
 	// if not empty, update category field
 	vp := reflect.ValueOf(payload)
@@ -292,7 +292,7 @@ func GetUserCategories(ctx context.Context, uid string, options *pagination.Opti
 	countQuery := "SELECT COUNT(*) FROM categories WHERE uid = :uid"
 
 	// execute query
-	count, err := database.NamedCountQuery(ctx, categoriesDatabase, countQuery, map[string]interface{}{"uid": uid})
+	count, err := database.NamedCountQuery(ctx, categoriesDatabase, countQuery, map[string]any{"uid": uid})
 
 	// check for errors
 	if err != nil {
@@ -358,7 +358,7 @@ func DeleteAllUserCategories(ctx context.Context, uid string) error {
   `
 
 	// execute query
-	if err := database.NamedExecQuery(ctx, categoriesDatabase, q, map[string]interface{}{
+	if err := database.NamedExecQuery(ctx, categoriesDatabase, q, map[string]any{
 		"uid": uid,
 	}); err != nil {
 		return fmt.Errorf("deleting categories: %w", err)

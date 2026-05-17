@@ -23,12 +23,12 @@ var tasksDatabase = sqlx.NewDb(sqldb.Named("tasks").Stdlib(), "postgres")
 //	@param ctx - context.Context
 //	@param field - string
 //	@param ops - string
-//	@param value - interface{}
+//	@param value - any | interface{}
 //	@return user
 //	@return error
-func FindOneByField(ctx context.Context, field, ops string, value interface{}) (Task, error) {
+func FindOneByField(ctx context.Context, field, ops string, value any) (Task, error) {
 	// set the data fields for the query
-	data := map[string]interface{}{
+	data := map[string]any{
 		field: value,
 	}
 
@@ -55,12 +55,12 @@ func FindOneByField(ctx context.Context, field, ops string, value interface{}) (
 //	@param ctx - context.Context
 //	@param field - string
 //	@param ops - string
-//	@param value - interface{}
+//	@param value - any
 //	@return tasks
 //	@return error
-func FindManyByField(ctx context.Context, field, ops string, value interface{}) ([]Task, error) {
+func FindManyByField(ctx context.Context, field, ops string, value any) ([]Task, error) {
 	// set the data fields for the query
-	data := map[string]interface{}{
+	data := map[string]any{
 		field: value,
 	}
 
@@ -168,7 +168,7 @@ func Delete(ctx context.Context, id string) error {
 	q := "DELETE FROM tasks WHERE id = :id"
 
 	// execute query
-	if err := database.NamedExecQuery(ctx, tasksDatabase, q, map[string]interface{}{
+	if err := database.NamedExecQuery(ctx, tasksDatabase, q, map[string]any{
 		"id": id,
 	}); err != nil {
 		return fmt.Errorf("deleting task: %w", err)
@@ -191,7 +191,7 @@ func DeleteMany(ctx context.Context, ids []string) error {
   `
 
 	// execute query
-	if err := database.NamedExecQuery(ctx, tasksDatabase, q, map[string]interface{}{
+	if err := database.NamedExecQuery(ctx, tasksDatabase, q, map[string]any{
 		"ids": ids,
 	}); err != nil {
 		return fmt.Errorf("deleting tasks: %w", err)
@@ -214,7 +214,7 @@ func DeleteAllWithUserID(ctx context.Context, id string) error {
   `
 
 	// execute query
-	if err := database.NamedExecQuery(ctx, tasksDatabase, q, map[string]interface{}{
+	if err := database.NamedExecQuery(ctx, tasksDatabase, q, map[string]any{
 		"uid": id,
 	}); err != nil {
 		return fmt.Errorf("deleting tasks: %w", err)
@@ -239,7 +239,7 @@ func Update(ctx context.Context, id string, payload *UpdateTaskPayload) error {
 	}
 
 	// map for query fields
-	fields := map[string]interface{}{}
+	fields := map[string]any{}
 
 	// if not empty, update task field
 	vp := reflect.ValueOf(payload)
@@ -294,7 +294,7 @@ func GetUserTasks(ctx context.Context, uid string, options *pagination.Options) 
 	countQuery := "SELECT COUNT(*) FROM tasks WHERE uid = :uid"
 
 	// execute query
-	count, err := database.NamedCountQuery(ctx, tasksDatabase, countQuery, map[string]interface{}{"uid": uid})
+	count, err := database.NamedCountQuery(ctx, tasksDatabase, countQuery, map[string]any{"uid": uid})
 
 	// check for errors
 	if err != nil {
@@ -367,7 +367,7 @@ func ToggleComplete(ctx context.Context, id string) error {
   `
 
 	// execute query
-	if err := database.NamedExecQuery(ctx, tasksDatabase, query, map[string]interface{}{
+	if err := database.NamedExecQuery(ctx, tasksDatabase, query, map[string]any{
 		"id":          task.ID,
 		"completed":   !task.Completed,
 		"completedAt": time.Now().UTC(),
@@ -394,7 +394,7 @@ func ToggleMultipleComplete(ctx context.Context, ids []string) error {
   `
 
 	// execute query
-	if err := database.NamedExecQuery(ctx, tasksDatabase, query, map[string]interface{}{
+	if err := database.NamedExecQuery(ctx, tasksDatabase, query, map[string]any{
 		"ids":          ids,
 		"completed":    true,
 		"completed_at": time.Now().UTC(),

@@ -108,7 +108,7 @@ func Status(ctx context.Context, db *sqlx.DB) error {
 //	@param query - query to execute
 //	@param data - data to bind to the query
 //	@return string - query string
-func queryString(query string, args ...interface{}) string {
+func queryString(query string, args ...any) string {
 	// takes up the query and returns it with the params
 	query, params, err := sqlx.Named(query, args)
 	if err != nil {
@@ -165,7 +165,7 @@ func NamedExecQuery(ctx context.Context, db *sqlx.DB, query string, data interfa
 //	@param data - data to bind to the query
 //	@param dest - destination to scan the rows into
 //	@return error - error if any
-func NamedSliceQuery(ctx context.Context, db *sqlx.DB, query string, data interface{}, dest interface{}) error {
+func NamedSliceQuery(ctx context.Context, db *sqlx.DB, query string, data interface{}, dest any) error {
 	// get formated query string
 	q := queryString(query, data)
 	// log query info
@@ -209,7 +209,7 @@ func NamedSliceQuery(ctx context.Context, db *sqlx.DB, query string, data interf
 //	@param data - data to bind to the query
 //	@param dest - destination to scan the row into
 //	@return error - error if any
-func NamedStructQuery(ctx context.Context, db *sqlx.DB, query string, data interface{}, dest interface{}) error {
+func NamedStructQuery(ctx context.Context, db *sqlx.DB, query string, data any, dest any) error {
 	q := queryString(query, data)
 	rlog.Info("database.NamedStructQuery", "query", q)
 
@@ -240,7 +240,7 @@ func NamedStructQuery(ctx context.Context, db *sqlx.DB, query string, data inter
 //	@param data - data to bind to the query
 //	@return int - integer value returned from the query
 //	@return error - error if any
-func NamedCountQuery(ctx context.Context, db *sqlx.DB, query string, data interface{}) (int, error) {
+func NamedCountQuery(ctx context.Context, db *sqlx.DB, query string, data any) (int, error) {
 	q := queryString(query, data)
 	rlog.Info("database.NamedQueryCount", "query", q)
 
